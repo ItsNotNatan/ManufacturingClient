@@ -1,0 +1,185 @@
+/* src/pages/Formulario/Formulario.css */
+
+/* ================== VARIÁVEIS DE CORES ================== */
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #eff6ff;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+    --bg-page: #f3f4f6;
+    --bg-box: #f9fafb;
+    --border: #e5e7eb;
+}
+
+/* ================== RESET ================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ================== ÁREA DO FORMULÁRIO ================== */
+.app-main {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: var(--bg-page);
+}
+
+.form-card {
+    max-width: 1024px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.badge-info {
+    background: var(--primary-light);
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 1.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ================== GRID E INPUTS ================== */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.4rem;
+}
+
+.input-control {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+    transition: border-color 0.2s;
+    font-size: 0.95rem;
+    background: white;
+}
+
+.input-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.box-highlight {
+    background: var(--bg-box);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+}
+
+/* ================== BOTÕES ================== */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    font-size: 0.95rem;
+}
+
+.btn-outline {
+    background: white;
+    color: var(--text-dark);
+    border: 1px solid #d1d5db;
+}
+
+.btn-outline:hover {
+    background: var(--bg-page);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+/* Animação */
+.fade-in {
+    animation: fadeIn 0.4s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
