@@ -1,8 +1,8 @@
-// src/components/Navbar/Navbar.jsx
+// src/components/NavBar/Navbar.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Truck, FileText, LayoutDashboard, LogOut } from 'lucide-react';
-import './Navbar.css'; // Criaremos este CSS a seguir (opcional se usares Tailwind depois)
+import './Navbar.css';
 
 export default function Navbar() {
     return (
@@ -16,9 +16,9 @@ export default function Navbar() {
 
             {/* Links de Navegação */}
             <nav className="nav-links">
-                {/* O NavLink adiciona a classe 'active' automaticamente quando a URL bate certo */}
-                <NavLink to="/dashboard" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <LayoutDashboard size={18} /> Dashboard
+                {/* Aqui está a correção: Aponta para /acompanhamento e mostra "Acompanhamento" */}
+                <NavLink to="/acompanhamento" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                    <LayoutDashboard size={18} /> Acompanhamento
                 </NavLink>
 
                 <NavLink to="/formulario" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>

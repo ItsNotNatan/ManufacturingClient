@@ -1,230 +1,218 @@
 // src/pages/Formulario/Formulario.jsx
-import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
-import { io } from 'socket.io-client';
-import { User, MapPin, Clock, Save, Trash2, PackagePlus } from 'lucide-react'; // Ícones modernos
+import React, { useState } from 'react';
+import { User, Wrench, Zap, Save, AlertTriangle } from 'lucide-react';
 import './Formulario.css';
 
-// 1. CONFIGURAÇÃO DO SOCKET E DADOS MOCKADOS
-// Em produção, substitui localhost pelo IP do teu servidor
-const SOCKET_URL = `http://localhost:3000`;
-const socket = io(SOCKET_URL);
-
-const LISTA_VEICULOS = ["Fiorino", "Van", "Caminhão 3/4", "Carreta"];
+// Opções para os menus dropdown adaptadas para a Indústria Automóvel
+const SETORES = ["Funilaria (Body Shop)", "Montagem Final", "Pintura", "Estamparia", "Manutenção", "Engenharia de Processos"];
+const TIPOS_DISPOSITIVO = ["Mesa Giratória", "Dispositivo RM", "Prensa de Solda", "Pinça de Solda", "Esteira Transportadora", "Outro"];
+const PRIORIDADES = [
+    "Baixa (Melhoria Futura)",
+    "Média (Projeto em Andamento)",
+    "Alta (Risco de Parada de Linha)",
+    "Crítica (Linha Parada / Segurança)"
+];
 
 export default function Formulario() {
-    // 2. ESTADOS (Variáveis) DO COMPONENTE
+    // 1. ESTADOS DO COMPONENTE (Variáveis de memória)
     const [carregando, setCarregando] = useState(false);
-    const [solicitante, setSolicitante] = useState('');
-    const [tipoOperacao, setTipoOperacao] = useState('');
-    const [veiculo, setVeiculo] = useState('');
 
-    // Estado para armazenar o endereço de coleta
-    const [coleta, setColeta] = useState({
-        cep: '', logradouro: '', numero: '', bairro: '', localidade: '', uf: ''
+    // Dados do Solicitante e Projeto
+    const [nome, setNome] = useState('');
+    const [setor, setSetor] = useState('');
+    const [projetoWbs, setProjetoWbs] = useState('');
+
+    // Detalhes do Dispositivo Industrial
+    const [tipoDispositivo, setTipoDispositivo] = useState('');
+    const [estacaoLinha, setEstacaoLinha] = useState('');
+    const [prioridade, setPrioridade] = useState('');
+
+    // Requisitos Técnicos de Chão de Fábrica
+    const [observacoes, setObservacoes] = useState('');
+    const [requisitos, setRequisitos] = useState({
+        eletrica220: false,
+        eletrica440: false,
+        arComprimido: false,
+        hidraulica: false,
+        integracaoCLP: false
     });
 
-    // Estado para gerir múltiplas cargas
-    const [cargas, setCargas] = useState([]);
-    const [novaCarga, setNovaCarga] = useState({
-        nome: '', quantidade: 1, peso: '', cor: '#3b82f6'
-    });
-
-    // 3. EFEITOS (Executado quando a página carrega)
-    useEffect(() => {
-        // Escuta atualizações do servidor em tempo real
-        socket.on('locais_atualizados', () => {
-            console.log('🔄 A lista de locais foi atualizada no servidor!');
-            // Aqui chamarias a tua API (Axios) para recarregar os dados
-        });
-
-        // Limpa a conexão do socket quando o utilizador sai da página
-        return () => {
-            socket.off('locais_atualizados');
-        };
-    }, []);
-
-    // 4. FUNÇÕES DE UTILIDADE E INTEGRAÇÃO DE API
-
-    // Função que consulta a API pública ViaCEP
-    const buscarCep = async (valorCep) => {
-        const cepLimpo = valorCep.replace(/\D/g, '');
-        setColeta(prev => ({ ...prev, cep: valorCep }));
-
-        if (cepLimpo.length === 8) {
-            try {
-                const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-                const data = await res.json();
-
-                if (!data.erro) {
-                    // Preenche os campos automaticamente com a resposta da API
-                    setColeta(prev => ({
-                        ...prev,
-                        logradouro: data.logradouro || '',
-                        bairro: data.bairro || '',
-                        localidade: data.localidade || '',
-                        uf: data.uf || ''
-                    }));
-                }
-            } catch (error) {
-                console.error("Erro ao buscar CEP:", error);
-            }
-        }
+    // Função para atualizar os requisitos técnicos quando uma checkbox é clicada
+    const handleRequisitosChange = (e) => {
+        const { name, checked } = e.target;
+        setRequisitos(prev => ({ ...prev, [name]: checked }));
     };
 
-    // Função para adicionar um novo item à lista de cargas
-    const handleAddCarga = () => {
-        if (!novaCarga.nome || !novaCarga.peso) return;
-
-        // Adiciona o item à lista existente com um ID único (Date.now())
-        setCargas([...cargas, { ...novaCarga, id: Date.now() }]);
-        // Limpa os campos de input
-        setNovaCarga({ nome: '', quantidade: 1, peso: '', cor: '#3b82f6' });
-    };
-
-    // Função disparada ao submeter o formulário
+    // 2. FUNÇÃO DE SUBMISSÃO
     const handleSubmit = (e) => {
-        e.preventDefault(); // Evita que a página recarregue
+        e.preventDefault();
         setCarregando(true);
 
-        // Aqui usamos o Axios para enviar os dados para o teu back-end
-        const dadosFinais = {
-            solicitante,
-            tipoOperacao,
-            veiculo,
-            endereco: coleta,
-            listaCargas: cargas
+        // Agrupamos os dados para enviar à base de dados (PocketBase)
+        const solicitacaoDeManufatura = {
+            solicitante: { nome, setor, projetoWbs },
+            dispositivo: { tipoDispositivo, estacaoLinha, prioridade },
+            requisitosTecnicos: requisitos,
+            especificacoesAdicionais: observacoes
         };
 
-        console.log("Enviando para o servidor:", dadosFinais);
+        console.log("Enviando ordem para o servidor:", solicitacaoDeManufatura);
 
-        // Simula o tempo de resposta do servidor
+        // Simulação do tempo de resposta da API
         setTimeout(() => {
-            alert("Sucesso! Transporte solicitado.");
+            alert("Sucesso! A ordem de fabrico/solicitação do dispositivo foi registada.");
             setCarregando(false);
+            // Aqui poderíamos limpar o formulário
         }, 1500);
     };
 
-    // 5. RENDERIZAÇÃO DA INTERFACE VISUAL (JSX)
+    // 3. RENDERIZAÇÃO DA INTERFACE VISUAL
     return (
         <div className="app-main">
             <section className="form-card fade-in">
 
                 <div className="card-header">
-                    <h3 className="card-title">Solicitação de Transporte</h3>
+                    <h3 className="card-title">Solicitação de Dispositivo Industrial</h3>
                     <div className="badge-info">
-                        <Clock size={16} style={{ display: 'inline', marginRight: '4px' }} />
-                        Preencha os dados
+                        <Wrench size={16} style={{ display: 'inline', marginRight: '4px' }} />
+                        Engenharia e Manufatura
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit}>
 
-                    {/* SECÇÃO: Solicitante */}
-                    <h4 className="section-title"><User size={20} /> Dados do Solicitante</h4>
+                    {/* BLOCO 1: DADOS DO SOLICITANTE E PROJETO */}
+                    <h4 className="section-title"><User size={20} /> Informações do Projeto</h4>
                     <div className="form-grid-3">
                         <div className="input-group">
-                            <label>Nome e sobrenome *</label>
+                            <label>Nome do Solicitante *</label>
                             <input
                                 type="text"
-                                value={solicitante}
-                                onChange={e => setSolicitante(e.target.value)}
+                                value={nome}
+                                onChange={e => setNome(e.target.value)}
                                 required
                                 className="input-control"
-                                placeholder="Seu nome"
+                                placeholder="Nome completo"
                             />
                         </div>
 
                         <div className="input-group">
-                            <label>Tipo de Operação *</label>
+                            <label>Setor / Área *</label>
                             <select
-                                value={tipoOperacao}
-                                onChange={e => setTipoOperacao(e.target.value)}
+                                value={setor}
+                                onChange={e => setSetor(e.target.value)}
                                 required
                                 className="input-control"
                             >
                                 <option value="" hidden>Selecione...</option>
-                                <option value="Nacional">NACIONAL</option>
-                                <option value="Nacionalizado">NACIONALIZADO</option>
+                                {SETORES.map((s, i) => <option key={i} value={s}>{s}</option>)}
                             </select>
                         </div>
 
                         <div className="input-group">
-                            <label>Veículo *</label>
-                            <select
-                                value={veiculo}
-                                onChange={e => setVeiculo(e.target.value)}
+                            <label>Código do Projeto / WBS *</label>
+                            <input
+                                type="text"
+                                value={projetoWbs}
+                                onChange={e => setProjetoWbs(e.target.value)}
                                 required
                                 className="input-control"
-                            >
-                                <option value="" hidden>Selecione...</option>
-                                {LISTA_VEICULOS.map((v, i) => <option key={i} value={v}>{v}</option>)}
-                            </select>
+                                placeholder="Ex: PRJ-2026-X"
+                            />
                         </div>
                     </div>
 
-                    {/* SECÇÃO: Endereço (Integração ViaCEP) */}
-                    <h4 className="section-title"><MapPin size={20} /> Rota e Coleta</h4>
+                    {/* BLOCO 2: ESPECIFICAÇÕES DO DISPOSITIVO */}
+                    <h4 className="section-title"><Wrench size={20} /> Especificações do Equipamento</h4>
                     <div className="box-highlight" style={{ marginBottom: '1.5rem' }}>
-                        <div className="form-grid-4">
+                        <div className="form-grid-3">
                             <div className="input-group">
-                                <label>CEP (Auto-preenchimento) *</label>
-                                <input
-                                    type="text"
-                                    maxLength="9"
-                                    value={coleta.cep}
-                                    onChange={(e) => buscarCep(e.target.value)}
+                                <label>Tipo de Dispositivo *</label>
+                                <select
+                                    value={tipoDispositivo}
+                                    onChange={e => setTipoDispositivo(e.target.value)}
                                     required
                                     className="input-control"
-                                    placeholder="00000000"
+                                >
+                                    <option value="" hidden>Selecione...</option>
+                                    {TIPOS_DISPOSITIVO.map((tipo, i) => <option key={i} value={tipo}>{tipo}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="input-group">
+                                <label>Linha / Estação de Aplicação *</label>
+                                <input
+                                    type="text"
+                                    value={estacaoLinha}
+                                    onChange={e => setEstacaoLinha(e.target.value)}
+                                    required
+                                    className="input-control"
+                                    placeholder="Ex: OP-30 / Célula de Solda B"
                                 />
                             </div>
-                            <div className="input-group" style={{ gridColumn: 'span 2' }}>
-                                <label>Logradouro (Rua/Av) *</label>
-                                <input type="text" value={coleta.logradouro} readOnly className="input-control" />
-                            </div>
+
                             <div className="input-group">
-                                <label>UF *</label>
-                                <input type="text" value={coleta.uf} readOnly className="input-control" />
+                                <label>Prioridade da Solicitação *</label>
+                                <select
+                                    value={prioridade}
+                                    onChange={e => setPrioridade(e.target.value)}
+                                    required
+                                    className="input-control"
+                                    style={{ borderColor: prioridade.includes('Crítica') ? '#ef4444' : '#d1d5db' }}
+                                >
+                                    <option value="" hidden>Selecione o impacto...</option>
+                                    {PRIORIDADES.map((p, i) => <option key={i} value={p}>{p}</option>)}
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    {/* SECÇÃO: Gestão de Cargas (Arrays) */}
-                    <h4 className="section-title"><PackagePlus size={20} /> Cargas</h4>
-                    <div className="box-highlight">
-                        <div className="form-grid-4">
-                            <div className="input-group" style={{ gridColumn: 'span 2' }}>
-                                <label>Nome / Descrição *</label>
-                                <input type="text" value={novaCarga.nome} onChange={e => setNovaCarga({ ...novaCarga, nome: e.target.value })} className="input-control" />
-                            </div>
-                            <div className="input-group">
-                                <label>Peso (kg) *</label>
-                                <input type="number" value={novaCarga.peso} onChange={e => setNovaCarga({ ...novaCarga, peso: e.target.value })} className="input-control" />
-                            </div>
+                    {/* BLOCO 3: REQUISITOS TÉCNICOS E ENERGIAS */}
+                    <h4 className="section-title"><Zap size={20} /> Requisitos Técnicos e Alimentação</h4>
+                    <div className="box-highlight" style={{ marginBottom: '1.5rem', backgroundColor: '#f8fafc' }}>
+                        <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '1rem' }}>
+                            Selecione os recursos necessários para a operação do dispositivo na fábrica:
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
+                                <input type="checkbox" name="eletrica220" checked={requisitos.eletrica220} onChange={handleRequisitosChange} />
+                                Elétrica (220V)
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
+                                <input type="checkbox" name="eletrica440" checked={requisitos.eletrica440} onChange={handleRequisitosChange} />
+                                Elétrica (440V / Trifásico)
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
+                                <input type="checkbox" name="arComprimido" checked={requisitos.arComprimido} onChange={handleRequisitosChange} />
+                                Rede de Ar Comprimido (Pneumática)
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
+                                <input type="checkbox" name="hidraulica" checked={requisitos.hidraulica} onChange={handleRequisitosChange} />
+                                Unidade Hidráulica
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500', color: '#0369a1' }}>
+                                <input type="checkbox" name="integracaoCLP" checked={requisitos.integracaoCLP} onChange={handleRequisitosChange} />
+                                Integração com CLP / Robô
+                            </label>
                         </div>
 
-                        <button type="button" onClick={handleAddCarga} className="btn btn-outline" style={{ marginTop: '1rem' }}>
-                            Adicionar à Lista
-                        </button>
-
-                        {/* Lista Visual das Cargas Adicionadas */}
-                        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {cargas.map((carga) => (
-                                <div key={carga.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: '#fff', borderLeft: `6px solid ${carga.cor}`, borderRadius: '4px' }}>
-                                    <span><strong>{carga.nome}</strong> - {carga.peso}kg</span>
-                                    <button type="button" onClick={() => setCargas(cargas.filter(c => c.id !== carga.id))} style={{ color: 'red', border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            ))}
+                        <div className="input-group">
+                            <label>Memorial Descritivo / Especificações Detalhadas</label>
+                            <textarea
+                                value={observacoes}
+                                onChange={e => setObservacoes(e.target.value)}
+                                rows="4"
+                                className="input-control"
+                                placeholder="Descreva medidas, capacidade de carga, tempo de ciclo esperado, normas de segurança específicas (ex: NR-12), ou referências de projetos 3D."
+                            ></textarea>
                         </div>
                     </div>
 
                     {/* SECÇÃO: Ações */}
                     <div className="form-actions">
                         <button type="submit" disabled={carregando} className="btn btn-primary">
-                            <Save size={18} /> {carregando ? 'Salvando...' : 'Salvar Solicitação'}
+                            <Save size={18} /> {carregando ? 'A processar...' : 'Enviar Solicitação de Projeto'}
                         </button>
                     </div>
 
