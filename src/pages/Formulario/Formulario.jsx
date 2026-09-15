@@ -1,221 +1,178 @@
 // src/pages/Formulario/Formulario.jsx
 import React, { useState } from 'react';
-import { User, Wrench, Zap, Save, AlertTriangle } from 'lucide-react';
+import Select from 'react-select';
+import { ClipboardList, Cpu, Users, Save } from 'lucide-react';
+import { formatarMoeda } from '../../utils/formatadores';
+import api from '../../services/api'; // Importamos o ficheiro que liga ao Supabase!
 import './Formulario.css';
 
-// Opções para os menus dropdown adaptadas para a Indústria Automóvel
-const SETORES = ["Funilaria (Body Shop)", "Montagem Final", "Pintura", "Estamparia", "Manutenção", "Engenharia de Processos"];
-const TIPOS_DISPOSITIVO = ["Mesa Giratória", "Dispositivo RM", "Prensa de Solda", "Pinça de Solda", "Esteira Transportadora", "Outro"];
-const PRIORIDADES = [
-    "Baixa (Melhoria Futura)",
-    "Média (Projeto em Andamento)",
-    "Alta (Risco de Parada de Linha)",
-    "Crítica (Linha Parada / Segurança)"
+// --- DADOS SIMULADOS PARA AS LISTAS SUSPENSAS ---
+const MOCK_PROJETOS = [
+    { value: 'PRJ-001', label: 'PRJ-001 - Projeto A' },
+    { value: 'PRJ-002', label: 'PRJ-002 - Projeto B' }
+];
+
+const MOCK_USUARIOS = [
+    { value: 'João Silva', label: 'João Silva' },
+    { value: 'Maria Costa', label: 'Maria Costa' },
+    { value: 'Carlos Souza', label: 'Carlos Souza' }
+];
+
+const TIPOS_DISPOSITIVO = [
+    { value: 'Gripper', label: 'Gripper' },
+    { value: 'Mesa', label: 'Mesa' },
+    { value: 'Pinça de Solda', label: 'Pinça de Solda' }
+];
+
+const ESCOPOS = [
+    { value: 'Construção', label: 'Construção' },
+    { value: 'Montagem', label: 'Montagem' },
+    { value: 'Medição', label: 'Medição' }
 ];
 
 export default function Formulario() {
-    // 1. ESTADOS DO COMPONENTE (Variáveis de memória)
+    // 1. ESTADOS DO COMPONENTE
     const [carregando, setCarregando] = useState(false);
 
-    // Dados do Solicitante e Projeto
-    const [nome, setNome] = useState('');
-    const [setor, setSetor] = useState('');
-    const [projetoWbs, setProjetoWbs] = useState('');
+    // Bloco 1: Base
+    const [projeto, setProjeto] = useState(null);
+    const [linha, setLinha] = useState('');
+    const [operacao, setOperacao] = useState('');
 
-    // Detalhes do Dispositivo Industrial
-    const [tipoDispositivo, setTipoDispositivo] = useState('');
-    const [estacaoLinha, setEstacaoLinha] = useState('');
-    const [prioridade, setPrioridade] = useState('');
+    // Bloco 2: Dispositivo
+    const [tipoDispositivo, setTipoDispositivo] = useState(null);
+    const [descricao, setDescricao] = useState('');
+    const [escopo, setEscopo] = useState([]);
+    const [precoTarget, setPrecoTarget] = useState('');
 
-    // Requisitos Técnicos de Chão de Fábrica
-    const [observacoes, setObservacoes] = useState('');
-    const [requisitos, setRequisitos] = useState({
-        eletrica220: false,
-        eletrica440: false,
-        arComprimido: false,
-        hidraulica: false,
-        integracaoCLP: false
-    });
+    // Bloco 3: Equipa
+    const [pm, setPm] = useState(null);
+    const [planner, setPlanner] = useState(null);
+    const [scl, setScl] = useState(null);
+    const [tlMecanico, setTlMecanico] = useState(null);
+    const [tlControls, setTlControls] = useState(null);
+    const [siteManager, setSiteManager] = useState(null);
+    const [siteSupervisor, setSiteSupervisor] = useState(null);
 
-    // Função para atualizar os requisitos técnicos quando uma checkbox é clicada
-    const handleRequisitosChange = (e) => {
-        const { name, checked } = e.target;
-        setRequisitos(prev => ({ ...prev, [name]: checked }));
-    };
-
-    // 2. FUNÇÃO DE SUBMISSÃO
-    const handleSubmit = (e) => {
+    // 2. FUNÇÃO QUE ENVIA PARA A BASE DE DADOS
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setCarregando(true);
 
-        // Agrupamos os dados para enviar à base de dados (PocketBase)
-        const solicitacaoDeManufatura = {
-            solicitante: { nome, setor, projetoWbs },
-            dispositivo: { tipoDispositivo, estacaoLinha, prioridade },
-            requisitosTecnicos: requisitos,
-            especificacoesAdicionais: observacoes
+        // Preparamos o pacote de dados exatamente como a nossa tabela no Supabase espera
+        const dadosDoFormulario = {
+            projeto: projeto?.value,
+            linha: linha,
+            operacao: operacao,
+            tipo_dispositivo: tipoDispositivo?.value,
+            descricao: descricao,
+            escopo: escopo.map(item => item.value), // Extrai os textos do array de múltipla escolha
+            preco_target: precoTarget ? parseFloat(precoTarget.replace(/\./g, '').replace(',', '.')) : null,
+            pm: pm?.value,
+            planner: planner?.value,
+            scl: scl?.value,
+            tl_mecanico: tlMecanico?.value,
+            tl_controls: tlControls?.value,
+            site_manager: siteManager?.value,
+            site_supervisor: siteSupervisor?.value,
+            status: 'pendente' // Estado inicial automático
         };
 
-        console.log("Enviando ordem para o servidor:", solicitacaoDeManufatura);
+        try {
+            console.log("A enviar para o Supabase...", dadosDoFormulario);
 
-        // Simulação do tempo de resposta da API
-        setTimeout(() => {
-            alert("Sucesso! A ordem de fabrico/solicitação do dispositivo foi registada.");
+            // Fazemos o POST para a tabela 'dispositivos' (certifica-te que criaste esta tabela no Supabase!)
+            await api.post('/dispositivos', dadosDoFormulario);
+
+            alert("Dispositivo registado com sucesso!");
+
+            // Opcional: Limpar o formulário depois do sucesso
+            setDescricao('');
+            setPrecoTarget('');
+
+        } catch (erro) {
+            console.error("Erro ao guardar dispositivo:", erro);
+            alert("Erro ao gravar. Verifica se a tabela 'dispositivos' existe no Supabase.");
+        } finally {
             setCarregando(false);
-            // Aqui poderíamos limpar o formulário
-        }, 1500);
+        }
     };
 
-    // 3. RENDERIZAÇÃO DA INTERFACE VISUAL
+    // Estilo para a biblioteca React-Select
+    const reactSelectStyles = {
+        control: (base) => ({ ...base, borderRadius: '0.5rem', padding: '2px', borderColor: '#d1d5db' })
+    };
+
+    // 3. RENDERIZAÇÃO
     return (
         <div className="app-main">
-            <section className="form-card fade-in">
-
+            <section className="form-card">
                 <div className="card-header">
-                    <h3 className="card-title">Solicitação de Dispositivo Industrial</h3>
-                    <div className="badge-info">
-                        <Wrench size={16} style={{ display: 'inline', marginRight: '4px' }} />
-                        Engenharia e Manufatura
-                    </div>
+                    <h3 className="card-title">Cadastro de Novo Dispositivo</h3>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-
-                    {/* BLOCO 1: DADOS DO SOLICITANTE E PROJETO */}
-                    <h4 className="section-title"><User size={20} /> Informações do Projeto</h4>
+                    {/* INFORMAÇÕES BASE */}
+                    <h4 className="section-title"><ClipboardList size={20} /> Informações Base</h4>
                     <div className="form-grid-3">
                         <div className="input-group">
-                            <label>Nome do Solicitante *</label>
-                            <input
-                                type="text"
-                                value={nome}
-                                onChange={e => setNome(e.target.value)}
-                                required
-                                className="input-control"
-                                placeholder="Nome completo"
-                            />
+                            <label>1. Projeto *</label>
+                            <Select options={MOCK_PROJETOS} value={projeto} onChange={setProjeto} isSearchable required styles={reactSelectStyles} />
                         </div>
-
                         <div className="input-group">
-                            <label>Setor / Área *</label>
-                            <select
-                                value={setor}
-                                onChange={e => setSetor(e.target.value)}
-                                required
-                                className="input-control"
-                            >
-                                <option value="" hidden>Selecione...</option>
-                                {SETORES.map((s, i) => <option key={i} value={s}>{s}</option>)}
-                            </select>
+                            <label>2. Linha *</label>
+                            <input type="text" value={linha} onChange={e => setLinha(e.target.value)} required className="input-control" />
                         </div>
-
                         <div className="input-group">
-                            <label>Código do Projeto / WBS *</label>
-                            <input
-                                type="text"
-                                value={projetoWbs}
-                                onChange={e => setProjetoWbs(e.target.value)}
-                                required
-                                className="input-control"
-                                placeholder="Ex: PRJ-2026-X"
-                            />
+                            <label>3. Operação *</label>
+                            <input type="text" value={operacao} onChange={e => setOperacao(e.target.value)} required className="input-control" />
                         </div>
                     </div>
 
-                    {/* BLOCO 2: ESPECIFICAÇÕES DO DISPOSITIVO */}
-                    <h4 className="section-title"><Wrench size={20} /> Especificações do Equipamento</h4>
-                    <div className="box-highlight" style={{ marginBottom: '1.5rem' }}>
+                    {/* DISPOSITIVO */}
+                    <h4 className="section-title"><Cpu size={20} /> Detalhes do Dispositivo</h4>
+                    <div className="box-highlight">
+                        <div className="form-grid-2">
+                            <div className="input-group">
+                                <label>4. Tipo de dispositivo *</label>
+                                <Select options={TIPOS_DISPOSITIVO} value={tipoDispositivo} onChange={setTipoDispositivo} required styles={reactSelectStyles} />
+                            </div>
+                            <div className="input-group">
+                                <label>7. Preço Target (R$)</label>
+                                <input type="text" value={precoTarget} onChange={e => setPrecoTarget(formatarMoeda(e.target.value))} className="input-control" />
+                            </div>
+                        </div>
+                        <div className="input-group" style={{ marginTop: '1rem' }}>
+                            <label>5. Descrição do dispositivo *</label>
+                            <input type="text" value={descricao} onChange={e => setDescricao(e.target.value)} required className="input-control" />
+                        </div>
+                        <div className="input-group" style={{ marginTop: '1rem' }}>
+                            <label>6. Escopo Desejado *</label>
+                            <Select isMulti options={ESCOPOS} value={escopo} onChange={setEscopo} required styles={reactSelectStyles} />
+                        </div>
+                    </div>
+
+                    {/* EQUIPA */}
+                    <h4 className="section-title"><Users size={20} /> Equipa Responsável</h4>
+                    <div className="box-highlight">
                         <div className="form-grid-3">
-                            <div className="input-group">
-                                <label>Tipo de Dispositivo *</label>
-                                <select
-                                    value={tipoDispositivo}
-                                    onChange={e => setTipoDispositivo(e.target.value)}
-                                    required
-                                    className="input-control"
-                                >
-                                    <option value="" hidden>Selecione...</option>
-                                    {TIPOS_DISPOSITIVO.map((tipo, i) => <option key={i} value={tipo}>{tipo}</option>)}
-                                </select>
-                            </div>
-
-                            <div className="input-group">
-                                <label>Linha / Estação de Aplicação *</label>
-                                <input
-                                    type="text"
-                                    value={estacaoLinha}
-                                    onChange={e => setEstacaoLinha(e.target.value)}
-                                    required
-                                    className="input-control"
-                                    placeholder="Ex: OP-30 / Célula de Solda B"
-                                />
-                            </div>
-
-                            <div className="input-group">
-                                <label>Prioridade da Solicitação *</label>
-                                <select
-                                    value={prioridade}
-                                    onChange={e => setPrioridade(e.target.value)}
-                                    required
-                                    className="input-control"
-                                    style={{ borderColor: prioridade.includes('Crítica') ? '#ef4444' : '#d1d5db' }}
-                                >
-                                    <option value="" hidden>Selecione o impacto...</option>
-                                    {PRIORIDADES.map((p, i) => <option key={i} value={p}>{p}</option>)}
-                                </select>
-                            </div>
+                            <div className="input-group"><label>8. PM *</label><Select options={MOCK_USUARIOS} value={pm} onChange={setPm} required styles={reactSelectStyles} /></div>
+                            <div className="input-group"><label>9. Planner *</label><Select options={MOCK_USUARIOS} value={planner} onChange={setPlanner} required styles={reactSelectStyles} /></div>
+                            <div className="input-group"><label>10. SCL *</label><Select options={MOCK_USUARIOS} value={scl} onChange={setScl} required styles={reactSelectStyles} /></div>
+                        </div>
+                        <div className="form-grid-4">
+                            <div className="input-group"><label>11. TL Mecânico *</label><Select options={MOCK_USUARIOS} value={tlMecanico} onChange={setTlMecanico} required styles={reactSelectStyles} /></div>
+                            <div className="input-group"><label>12. TL de Controls *</label><Select options={MOCK_USUARIOS} value={tlControls} onChange={setTlControls} required styles={reactSelectStyles} /></div>
+                            <div className="input-group"><label>13. Site Manager *</label><Select options={MOCK_USUARIOS} value={siteManager} onChange={setSiteManager} required styles={reactSelectStyles} /></div>
+                            <div className="input-group"><label>14. Site Sup. *</label><Select options={MOCK_USUARIOS} value={siteSupervisor} onChange={setSiteSupervisor} required styles={reactSelectStyles} /></div>
                         </div>
                     </div>
 
-                    {/* BLOCO 3: REQUISITOS TÉCNICOS E ENERGIAS */}
-                    <h4 className="section-title"><Zap size={20} /> Requisitos Técnicos e Alimentação</h4>
-                    <div className="box-highlight" style={{ marginBottom: '1.5rem', backgroundColor: '#f8fafc' }}>
-                        <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '1rem' }}>
-                            Selecione os recursos necessários para a operação do dispositivo na fábrica:
-                        </p>
-
-                        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
-                                <input type="checkbox" name="eletrica220" checked={requisitos.eletrica220} onChange={handleRequisitosChange} />
-                                Elétrica (220V)
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
-                                <input type="checkbox" name="eletrica440" checked={requisitos.eletrica440} onChange={handleRequisitosChange} />
-                                Elétrica (440V / Trifásico)
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
-                                <input type="checkbox" name="arComprimido" checked={requisitos.arComprimido} onChange={handleRequisitosChange} />
-                                Rede de Ar Comprimido (Pneumática)
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500' }}>
-                                <input type="checkbox" name="hidraulica" checked={requisitos.hidraulica} onChange={handleRequisitosChange} />
-                                Unidade Hidráulica
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '500', color: '#0369a1' }}>
-                                <input type="checkbox" name="integracaoCLP" checked={requisitos.integracaoCLP} onChange={handleRequisitosChange} />
-                                Integração com CLP / Robô
-                            </label>
-                        </div>
-
-                        <div className="input-group">
-                            <label>Memorial Descritivo / Especificações Detalhadas</label>
-                            <textarea
-                                value={observacoes}
-                                onChange={e => setObservacoes(e.target.value)}
-                                rows="4"
-                                className="input-control"
-                                placeholder="Descreva medidas, capacidade de carga, tempo de ciclo esperado, normas de segurança específicas (ex: NR-12), ou referências de projetos 3D."
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    {/* SECÇÃO: Ações */}
                     <div className="form-actions">
-                        <button type="submit" disabled={carregando} className="btn btn-primary">
-                            <Save size={18} /> {carregando ? 'A processar...' : 'Enviar Solicitação de Projeto'}
+                        <button type="submit" disabled={carregando} className="btn-primary">
+                            <Save size={18} /> {carregando ? 'A guardar...' : 'Guardar Dispositivo'}
                         </button>
                     </div>
-
                 </form>
             </section>
         </div>
