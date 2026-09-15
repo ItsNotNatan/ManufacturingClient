@@ -1,21 +1,20 @@
 // src/services/api.js
 import axios from 'axios';
 
-// Criamos uma "ferramenta de envio" configurada com as tuas chaves do .env
+// 1. Criamos a ferramenta de envio apontando para o nosso Back-end (localhost:3000/api)
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL, // O link do teu Supabase
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
-        'Content-Type': 'application/json',
-        'apikey': import.meta.env.VITE_API_KEY || '', // A tua chave
-        'Authorization': `Bearer ${import.meta.env.VITE_API_KEY || ''}`
+        'Content-Type': 'application/json'
+        // Removemos o 'apikey' e 'Authorization' daqui!
     }
 });
 
-// Interceptor: ajuda a mostrar na consola se houver algum erro de comunicação
+// 2. Interceptor: Ajuda a mostrar na consola se houver algum erro de comunicação
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.error("Erro de comunicação com a Base de Dados:", error);
+        console.error("Erro de comunicação com o Back-end:", error);
         return Promise.reject(error);
     }
 );
