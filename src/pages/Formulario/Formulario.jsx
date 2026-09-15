@@ -90,9 +90,19 @@ export default function Formulario() {
             setDescricao('');
             setPrecoTarget('');
 
+            // src/pages/Formulario/Formulario.jsx
+
         } catch (erro) {
-            console.error("Erro ao guardar dispositivo:", erro);
-            alert("Erro ao gravar. Verifica se a tabela 'dispositivos' existe no Supabase.");
+            // Removemos a mensagem estática e mostramos o erro verdadeiro!
+            console.error("Erro completo:", erro);
+
+            if (erro.response) {
+                // Erro que veio do Back-end
+                alert(`Erro do Servidor: ${JSON.stringify(erro.response.data)}`);
+            } else {
+                // Erro de rede (ex: Back-end desligado)
+                alert(`Erro de Comunicação: ${erro.message}`);
+            }
         } finally {
             setCarregando(false);
         }
