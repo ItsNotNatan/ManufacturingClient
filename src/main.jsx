@@ -1,13 +1,14 @@
+// src/main.jsx
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RouterProvider } from 'react-router-dom'; // 1. Importamos o provedor de rotas
+import { RouterProvider } from 'react-router-dom'; // Ferramenta que ativa as rotas
 
-import { rotas } from './routes/routes.jsx'; // 2. Importamos o mapa de rotas que criaste
-import './index.css';
+import { rotas } from './routes/routes.jsx'; // O mapa que acabámos de criar
+import './index.css'; // Os teus estilos globais
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* 3. Trocamos o antigo <App /> pelo RouterProvider */}
+    {/* Removemos o antigo <App /> e colocamos o fornecedor de rotas */}
     <RouterProvider router={rotas} />
   </StrictMode>,
 );
