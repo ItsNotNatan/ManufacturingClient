@@ -1,190 +1,182 @@
 // src/pages/Formulario/Formulario.jsx
 import React, { useState } from 'react';
-import Select from 'react-select';
-import { ClipboardList, Cpu, Users, Save } from 'lucide-react';
-import { formatarMoeda } from '../../utils/formatadores';
-import api from '../../services/api'; // Importamos o ficheiro que liga ao Supabase!
+import { FilePlus, Send, LayoutTemplate, Settings, Users } from 'lucide-react';
 import './Formulario.css';
 
-// --- DADOS SIMULADOS PARA AS LISTAS SUSPENSAS ---
-const MOCK_PROJETOS = [
-    { value: 'PRJ-001', label: 'PRJ-001 - Projeto A' },
-    { value: 'PRJ-002', label: 'PRJ-002 - Projeto B' }
-];
-
-const MOCK_USUARIOS = [
-    { value: 'João Silva', label: 'João Silva' },
-    { value: 'Maria Costa', label: 'Maria Costa' },
-    { value: 'Carlos Souza', label: 'Carlos Souza' }
-];
-
-const TIPOS_DISPOSITIVO = [
-    { value: 'Gripper', label: 'Gripper' },
-    { value: 'Mesa', label: 'Mesa' },
-    { value: 'Pinça de Solda', label: 'Pinça de Solda' }
-];
-
-const ESCOPOS = [
-    { value: 'Construção', label: 'Construção' },
-    { value: 'Montagem', label: 'Montagem' },
-    { value: 'Medição', label: 'Medição' }
-];
-
 export default function Formulario() {
-    // 1. ESTADOS DO COMPONENTE
-    const [carregando, setCarregando] = useState(false);
+    const [dados, setDados] = useState({
+        tipoSolicitacao: 'eventual',
+        projeto: '',
+        linha: '',
+        operacao: '',
+        nomeDispositivo: '',
+        tipoDispositivo: '',
+        descricaoDispositivo: '',
+        escopoDesejado: [],
+        precoTarget: '',
+        pm: '',
+        planner: '',
+        scl: '',
+        tlMecanico: '',
+        tlControls: '',
+        siteManager: '',
+        siteSupervisor: ''
+    });
 
-    // Bloco 1: Base
-    const [projeto, setProjeto] = useState(null);
-    const [linha, setLinha] = useState('');
-    const [operacao, setOperacao] = useState('');
+    const lidarComMudanca = (e) => {
+        const { name, value, type, checked } = e.target;
 
-    // Bloco 2: Dispositivo
-    const [tipoDispositivo, setTipoDispositivo] = useState(null);
-    const [descricao, setDescricao] = useState('');
-    const [escopo, setEscopo] = useState([]);
-    const [precoTarget, setPrecoTarget] = useState('');
-
-    // Bloco 3: Equipa
-    const [pm, setPm] = useState(null);
-    const [planner, setPlanner] = useState(null);
-    const [scl, setScl] = useState(null);
-    const [tlMecanico, setTlMecanico] = useState(null);
-    const [tlControls, setTlControls] = useState(null);
-    const [siteManager, setSiteManager] = useState(null);
-    const [siteSupervisor, setSiteSupervisor] = useState(null);
-
-    // 2. FUNÇÃO QUE ENVIA PARA A BASE DE DADOS
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setCarregando(true);
-
-        // Preparamos o pacote de dados exatamente como a nossa tabela no Supabase espera
-        const dadosDoFormulario = {
-            projeto: projeto?.value,
-            linha: linha,
-            operacao: operacao,
-            tipo_dispositivo: tipoDispositivo?.value,
-            descricao: descricao,
-            escopo: escopo.map(item => item.value), // Extrai os textos do array de múltipla escolha
-            preco_target: precoTarget ? parseFloat(precoTarget.replace(/\./g, '').replace(',', '.')) : null,
-            pm: pm?.value,
-            planner: planner?.value,
-            scl: scl?.value,
-            tl_mecanico: tlMecanico?.value,
-            tl_controls: tlControls?.value,
-            site_manager: siteManager?.value,
-            site_supervisor: siteSupervisor?.value,
-            status: 'pendente' // Estado inicial automático
-        };
-
-        try {
-            console.log("A enviar para o Supabase...", dadosDoFormulario);
-
-            // Fazemos o POST para a tabela 'dispositivos' (certifica-te que criaste esta tabela no Supabase!)
-            await api.post('/dispositivos', dadosDoFormulario);
-
-            alert("Dispositivo registado com sucesso!");
-
-            // Opcional: Limpar o formulário depois do sucesso
-            setDescricao('');
-            setPrecoTarget('');
-
-            // src/pages/Formulario/Formulario.jsx
-
-        } catch (erro) {
-            // Removemos a mensagem estática e mostramos o erro verdadeiro!
-            console.error("Erro completo:", erro);
-
-            if (erro.response) {
-                // Erro que veio do Back-end
-                alert(`Erro do Servidor: ${JSON.stringify(erro.response.data)}`);
-            } else {
-                // Erro de rede (ex: Back-end desligado)
-                alert(`Erro de Comunicação: ${erro.message}`);
-            }
-        } finally {
-            setCarregando(false);
+        if (type === 'checkbox') {
+            setDados(prev => {
+                const novoEscopo = checked
+                    ? [...prev.escopoDesejado, value]
+                    : prev.escopoDesejado.filter(item => item !== value);
+                return { ...prev, escopoDesejado: novoEscopo };
+            });
+        } else {
+            setDados(prev => ({ ...prev, [name]: value }));
         }
     };
 
-    // Estilo para a biblioteca React-Select
-    const reactSelectStyles = {
-        control: (base) => ({ ...base, borderRadius: '0.5rem', padding: '2px', borderColor: '#d1d5db' })
+    const lidarComEnvio = (e) => {
+        e.preventDefault();
+        console.log("Dados da solicitação:", dados);
+        alert('Solicitação criada com sucesso!');
+        // Aqui você faria a chamada para a sua API / PocketBase
     };
 
-    // 3. RENDERIZAÇÃO
+    // Lista simulada de usuários para os campos dinâmicos
+    const listaUsuarios = ["João Silva", "Maria Costa", "Carlos Souza", "Ana Oliveira"];
+
     return (
-        <div className="app-main">
-            <section className="form-card">
-                <div className="card-header">
-                    <h3 className="card-title">Cadastro de Novo Dispositivo</h3>
+        <div className="formulario-container">
+            <div className="formulario-header">
+                <h2 className="formulario-title">
+                    <FilePlus size={28} color="#2563eb" />
+                    Nova Solicitação de Equipamento
+                </h2>
+                <p>Preencha os dados de entrada para notificar a engenharia.</p>
+            </div>
+
+            <form onSubmit={lidarComEnvio} className="formulario-card">
+
+                {/* SEÇÃO 1: DADOS DO PROJETO */}
+                <div className="form-section">
+                    <h3 className="section-title"><LayoutTemplate size={20} /> Dados do Projeto</h3>
+
+                    <div className="form-group full-width radio-container">
+                        <label>Tipo de Solicitação</label>
+                        <div className="radio-group">
+                            <label><input type="radio" name="tipoSolicitacao" value="eventual" checked={dados.tipoSolicitacao === 'eventual'} onChange={lidarComMudanca} /> Eventual</label>
+                            <label><input type="radio" name="tipoSolicitacao" value="transmissao" checked={dados.tipoSolicitacao === 'transmissao'} onChange={lidarComMudanca} /> Transmissão</label>
+                        </div>
+                    </div>
+
+                    <div className="formulario-grid">
+                        <div className="form-group">
+                            <label>Projeto</label>
+                            <select name="projeto" value={dados.projeto} onChange={lidarComMudanca} required>
+                                <option value="">Selecione o projeto...</option>
+                                <option value="PRJ-A">Projeto A (Padrão ATMLog)</option>
+                                <option value="PRJ-B">Projeto B</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Linha</label>
+                            <input type="text" name="linha" value={dados.linha} onChange={lidarComMudanca} required />
+                        </div>
+                        <div className="form-group">
+                            <label>Operação</label>
+                            <input type="text" name="operacao" value={dados.operacao} onChange={lidarComMudanca} required />
+                        </div>
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    {/* INFORMAÇÕES BASE */}
-                    <h4 className="section-title"><ClipboardList size={20} /> Informações Base</h4>
-                    <div className="form-grid-3">
-                        <div className="input-group">
-                            <label>1. Projeto *</label>
-                            <Select options={MOCK_PROJETOS} value={projeto} onChange={setProjeto} isSearchable required styles={reactSelectStyles} />
-                        </div>
-                        <div className="input-group">
-                            <label>2. Linha *</label>
-                            <input type="text" value={linha} onChange={e => setLinha(e.target.value)} required className="input-control" />
-                        </div>
-                        <div className="input-group">
-                            <label>3. Operação *</label>
-                            <input type="text" value={operacao} onChange={e => setOperacao(e.target.value)} required className="input-control" />
-                        </div>
-                    </div>
+                <hr className="divider" />
 
-                    {/* DISPOSITIVO */}
-                    <h4 className="section-title"><Cpu size={20} /> Detalhes do Dispositivo</h4>
-                    <div className="box-highlight">
-                        <div className="form-grid-2">
-                            <div className="input-group">
-                                <label>4. Tipo de dispositivo *</label>
-                                <Select options={TIPOS_DISPOSITIVO} value={tipoDispositivo} onChange={setTipoDispositivo} required styles={reactSelectStyles} />
+                {/* SEÇÃO 2: DADOS DO DISPOSITIVO */}
+                <div className="form-section">
+                    <h3 className="section-title"><Settings size={20} /> Detalhes do Dispositivo</h3>
+                    <div className="formulario-grid">
+                        <div className="form-group">
+                            <label>Nome do Dispositivo</label>
+                            <input type="text" name="nomeDispositivo" value={dados.nomeDispositivo} onChange={lidarComMudanca} required />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Tipo de Dispositivo</label>
+                            <select name="tipoDispositivo" value={dados.tipoDispositivo} onChange={lidarComMudanca} required>
+                                <option value="">Selecione...</option>
+                                <option value="Gripper">Gripper</option>
+                                <option value="Mesa">Mesa</option>
+                                <option value="Gate">Gate</option>
+                                <option value="Suporte">Suporte</option>
+                                <option value="Pedestal">Pedestal</option>
+                                <option value="Base">Base</option>
+                                <option value="Bracket">Bracket</option>
+                                <option value="Baia">Baia</option>
+                                <option value="Garagem">Garagem</option>
+                                <option value="Kit modifica">Kit modifica</option>
+                                <option value="Carrinho">Carrinho</option>
+                                <option value="Outros">Outros dispositivos</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group full-width">
+                            <label>Descrição do Dispositivo</label>
+                            <textarea name="descricaoDispositivo" rows="3" value={dados.descricaoDispositivo} onChange={lidarComMudanca} required></textarea>
+                        </div>
+
+                        <div className="form-group full-width">
+                            <label>Escopo Desejado (Múltipla Seleção)</label>
+                            <div className="checkbox-group">
+                                {['Construção', 'Montagem', 'Bordo-máquina', 'Medição', 'Comissionamento'].map(opcao => (
+                                    <label key={opcao} className="checkbox-label">
+                                        <input type="checkbox" name="escopoDesejado" value={opcao} checked={dados.escopoDesejado.includes(opcao)} onChange={lidarComMudanca} />
+                                        {opcao}
+                                    </label>
+                                ))}
                             </div>
-                            <div className="input-group">
-                                <label>7. Preço Target (R$)</label>
-                                <input type="text" value={precoTarget} onChange={e => setPrecoTarget(formatarMoeda(e.target.value))} className="input-control" />
-                            </div>
                         </div>
-                        <div className="input-group" style={{ marginTop: '1rem' }}>
-                            <label>5. Descrição do dispositivo *</label>
-                            <input type="text" value={descricao} onChange={e => setDescricao(e.target.value)} required className="input-control" />
-                        </div>
-                        <div className="input-group" style={{ marginTop: '1rem' }}>
-                            <label>6. Escopo Desejado *</label>
-                            <Select isMulti options={ESCOPOS} value={escopo} onChange={setEscopo} required styles={reactSelectStyles} />
-                        </div>
-                    </div>
 
-                    {/* EQUIPA */}
-                    <h4 className="section-title"><Users size={20} /> Equipa Responsável</h4>
-                    <div className="box-highlight">
-                        <div className="form-grid-3">
-                            <div className="input-group"><label>8. PM *</label><Select options={MOCK_USUARIOS} value={pm} onChange={setPm} required styles={reactSelectStyles} /></div>
-                            <div className="input-group"><label>9. Planner *</label><Select options={MOCK_USUARIOS} value={planner} onChange={setPlanner} required styles={reactSelectStyles} /></div>
-                            <div className="input-group"><label>10. SCL *</label><Select options={MOCK_USUARIOS} value={scl} onChange={setScl} required styles={reactSelectStyles} /></div>
-                        </div>
-                        <div className="form-grid-4">
-                            <div className="input-group"><label>11. TL Mecânico *</label><Select options={MOCK_USUARIOS} value={tlMecanico} onChange={setTlMecanico} required styles={reactSelectStyles} /></div>
-                            <div className="input-group"><label>12. TL de Controls *</label><Select options={MOCK_USUARIOS} value={tlControls} onChange={setTlControls} required styles={reactSelectStyles} /></div>
-                            <div className="input-group"><label>13. Site Manager *</label><Select options={MOCK_USUARIOS} value={siteManager} onChange={setSiteManager} required styles={reactSelectStyles} /></div>
-                            <div className="input-group"><label>14. Site Sup. *</label><Select options={MOCK_USUARIOS} value={siteSupervisor} onChange={setSiteSupervisor} required styles={reactSelectStyles} /></div>
+                        <div className="form-group">
+                            <label>Preço Target (Opcional - R$)</label>
+                            <input type="number" name="precoTarget" placeholder="0.00" step="0.01" value={dados.precoTarget} onChange={lidarComMudanca} />
                         </div>
                     </div>
+                </div>
 
-                    <div className="form-actions">
-                        <button type="submit" disabled={carregando} className="btn-primary">
-                            <Save size={18} /> {carregando ? 'A guardar...' : 'Guardar Dispositivo'}
-                        </button>
+                <hr className="divider" />
+
+                {/* SEÇÃO 3: EQUIPE RESPONSÁVEL */}
+                <div className="form-section">
+                    <h3 className="section-title"><Users size={20} /> Equipe Responsável</h3>
+                    <p className="section-subtitle">Selecione os usuários responsáveis (Lista Dinâmica)</p>
+
+                    <div className="formulario-grid team-grid">
+                        {['PM', 'Planner', 'SCL', 'TL Mecânico', 'TL de Controls', 'Site Manager', 'Site Supervisor'].map(cargo => {
+                            // Converte o nome do cargo para o formato do estado (ex: "Site Manager" -> "siteManager")
+                            let key = cargo.toLowerCase().replace(/ (de )?./g, match => match.replace(/ (de )?/, '').toUpperCase()).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                            return (
+                                <div className="form-group" key={key}>
+                                    <label>{cargo}</label>
+                                    <select name={key} value={dados[key]} onChange={lidarComMudanca} required>
+                                        <option value="">Buscar usuário...</option>
+                                        {listaUsuarios.map(usr => <option key={usr} value={usr}>{usr}</option>)}
+                                    </select>
+                                </div>
+                            );
+                        })}
                     </div>
-                </form>
-            </section>
+                </div>
+
+                <div className="form-actions">
+                    <button type="submit" className="btn-enviar">
+                        <Send size={18} />
+                        Gerar Solicitação e Notificar Mecânica
+                    </button>
+                </div>
+            </form>
         </div>
     );
 }

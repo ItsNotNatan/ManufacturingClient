@@ -1,145 +1,181 @@
 /* src/pages/Formulario/Formulario.css */
 
-.app-main {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-    background-color: #f3f4f6;
-}
-
-.form-card {
-    max-width: 1024px;
+.formulario-container {
+    max-width: 1000px;
     margin: 0 auto;
-    background: white;
-    border-radius: 0.75rem;
-    border: 1px solid #e5e7eb;
-    padding: 2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding-bottom: 3rem;
     animation: fadeIn 0.4s ease-in-out forwards;
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 1rem;
+.formulario-header {
     margin-bottom: 1.5rem;
 }
 
-.card-title {
-    font-size: 1.5rem;
+.formulario-title {
+    font-size: 1.8rem;
     font-weight: 700;
     color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.badge-info {
-    background: #eff6ff;
-    color: #1e40af;
-    border: 1px solid #bfdbfe;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 700;
+.formulario-header p {
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.formulario-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .section-title {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: 1.2rem;
     color: #2563eb;
-    margin: 1.5rem 0 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eff6ff;
+    padding-bottom: 0.5rem;
 }
 
-.form-grid-2 {
+.section-subtitle {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+.divider {
+    border: 0;
+    height: 1px;
+    background: #e5e7eb;
+    margin: 2.5rem 0;
+}
+
+.formulario-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
 }
 
-.form-grid-3 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+.team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.form-grid-4 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
 }
 
-.input-group label {
-    display: block;
-    font-size: 0.875rem;
+.full-width {
+    grid-column: 1 / -1;
+}
+
+label {
+    font-size: 0.85rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 0.4rem;
 }
 
-.input-control {
-    width: 100%;
-    padding: 0.5rem 0.8rem;
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    padding: 0.65rem 0.8rem;
     border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    outline: none;
+    border-radius: 0.4rem;
     font-size: 0.95rem;
-    box-sizing: border-box;
+    color: #1f2937;
+    background-color: #f9fafb;
+    transition: all 0.2s;
+    font-family: inherit;
 }
 
-.input-control:focus {
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
     border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background-color: white;
 }
 
-.box-highlight {
-    background: #f9fafb;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
+/* Radio & Checkboxes */
+.radio-container {
+    margin-bottom: 1rem;
 }
 
-.form-actions {
+.radio-group,
+.checkbox-group {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    border-top: 1px solid #e5e7eb;
-    padding-top: 1.5rem;
-    margin-top: 2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 0.5rem 0;
 }
 
-.btn-primary {
-    background: #2563eb;
-    color: white;
-    padding: 0.6rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    cursor: pointer;
+.radio-group label,
+.checkbox-label {
     display: flex;
     align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    color: #4b5563;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #2563eb;
+    cursor: pointer;
+}
+
+/* Botão de Envio */
+.form-actions {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-enviar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    padding: 0.9rem 2rem;
+    background-color: #2563eb;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
     border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-.btn-primary:hover {
-    background: #1d4ed8;
+.btn-enviar:hover {
+    background-color: #1d4ed8;
 }
 
-.btn-primary:disabled {
-    background: #93c5fd;
-    cursor: not-allowed;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+@media (max-width: 768px) {
+    .formulario-card {
+        padding: 1.5rem;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .form-actions {
+        justify-content: stretch;
+    }
+
+    .btn-enviar {
+        width: 100%;
     }
 }
