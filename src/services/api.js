@@ -1,16 +1,14 @@
-// src/services/api.js
+// FILE: src/services/api.js
 import axios from 'axios';
 
-// 1. Criamos a ferramenta de envio apontando para o nosso Back-end (localhost:3000/api)
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    // Adicionado o fallback para localhost:3000
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
     headers: {
         'Content-Type': 'application/json'
-        // Removemos o 'apikey' e 'Authorization' daqui!
     }
 });
 
-// 2. Interceptor: Ajuda a mostrar na consola se houver algum erro de comunicação
 api.interceptors.response.use(
     (response) => response,
     (error) => {
