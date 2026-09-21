@@ -6,9 +6,9 @@ import Formulario from '../pages/Formulario/Formulario';
 import Acompanhamento from '../pages/Acompanhamento/Acompanhamento';
 
 // Importa as tuas novas Fases do Cliente!
-import Fase1 from '../pages/Fases/Fase1';
-import Fase2 from '../pages/Fases/Fase2';
-import Fase3 from '../pages/Fases/Fase3';
+import Fase1 from '../pages/Fases/Fase1/Fase1';
+import Fase2 from '../pages/Fases/Fase2/Fase2';
+import Fase3 from '../pages/Fases/Fase3/Fase3';
 
 export const rotas = createBrowserRouter([
     {
