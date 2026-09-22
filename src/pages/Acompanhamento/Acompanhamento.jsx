@@ -1,16 +1,23 @@
 // src/pages/Acompanhamento/Acompanhamento.jsx
 import React, { useState } from 'react';
 import { Search, Filter, Eye, Truck } from 'lucide-react';
+
+// Importamos o novo componente que acabámos de criar
+import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
+
 import './Acompanhamento.css';
 
 export default function Acompanhamento() {
     const [pesquisa, setPesquisa] = useState('');
 
-    // Dados simulados para visualizares a tabela
+    // ESTADO DO MODAL: Guarda a solicitação clicada
+    const [itemSelecionado, setItemSelecionado] = useState(null);
+
+    // Dados de exemplo
     const [solicitacoes] = useState([
-        { id: 'ATM-1023', solicitante: 'João Silva', veiculo: 'Fiorino', destino: 'São Paulo/SP', data: '14/09/2026', status: 'pendente' },
-        { id: 'ATM-1024', solicitante: 'Maria Costa', veiculo: 'Caminhão 3/4', destino: 'Belo Horizonte/MG', data: '15/09/2026', status: 'transito' },
-        { id: 'ATM-1025', solicitante: 'Carlos Souza', veiculo: 'Van', destino: 'Rio de Janeiro/RJ', data: '12/09/2026', status: 'concluido' },
+        { id: 'ATM-1023', solicitante: 'João Silva', veiculo: 'Fiorino', destino: 'São Paulo/SP', data: '14/09/2026', status: 'pendente', faseAtual: 1 },
+        { id: 'ATM-1024', solicitante: 'Maria Costa', veiculo: 'Caminhão 3/4', destino: 'Belo Horizonte/MG', data: '15/09/2026', status: 'transito', faseAtual: 2 },
+        { id: 'ATM-1025', solicitante: 'Carlos Souza', veiculo: 'Van', destino: 'Rio de Janeiro/RJ', data: '12/09/2026', status: 'concluido', faseAtual: 3 },
     ]);
 
     const getStatusClass = (status) => {
@@ -23,7 +30,9 @@ export default function Acompanhamento() {
     };
 
     const formatarStatus = (status) => {
-        if (status === 'transito') return 'Em Trânsito';
+        if (status === 'transito') return 'Em Planejamento';
+        if (status === 'pendente') return 'Em Orçamento';
+        if (status === 'concluido') return 'Em Manufatura';
         return status;
     };
 
@@ -35,7 +44,7 @@ export default function Acompanhamento() {
     return (
         <div className="acompanhamento-container">
             <div className="acompanhamento-header">
-                <h2 className="acompanhamento-title">Acompanhamento de Transportes</h2>
+                <h2 className="acompanhamento-title">Acompanhamento de Solicitações</h2>
             </div>
 
             <div className="acompanhamento-actions">
@@ -43,7 +52,7 @@ export default function Acompanhamento() {
                     <Search size={18} />
                     <input
                         type="text"
-                        placeholder="Pesquisar por nº do ATM ou Solicitante..."
+                        placeholder="Pesquisar por nº do Projeto ou Solicitante..."
                         value={pesquisa}
                         onChange={(e) => setPesquisa(e.target.value)}
                     />
@@ -62,7 +71,7 @@ export default function Acompanhamento() {
                             <th>Veículo</th>
                             <th>Destino</th>
                             <th>Data Prevista</th>
-                            <th>Status</th>
+                            <th>Status Geral</th>
                             <th style={{ textAlign: 'center' }}>Ações</th>
                         </tr>
                     </thead>
@@ -85,7 +94,12 @@ export default function Acompanhamento() {
                                         </span>
                                     </td>
                                     <td style={{ textAlign: 'center' }}>
-                                        <button className="btn-icon" title="Ver Detalhes">
+                                        {/* Atualiza o estado com o item clicado */}
+                                        <button
+                                            className="btn-icon"
+                                            title="Ver Detalhes e Fase"
+                                            onClick={() => setItemSelecionado(item)}
+                                        >
                                             <Eye size={18} />
                                         </button>
                                     </td>
@@ -101,6 +115,16 @@ export default function Acompanhamento() {
                     </tbody>
                 </table>
             </div>
+
+            {/* AQUI ESTÁ A MAGIA DA COMPONENTIZAÇÃO */}
+            {/* Chamamos o nosso novo componente, passando as Props necessárias */}
+            {itemSelecionado && (
+                <ModalDetalhes
+                    item={itemSelecionado}
+                    aoFechar={() => setItemSelecionado(null)}
+                />
+            )}
+
         </div>
     );
 }
