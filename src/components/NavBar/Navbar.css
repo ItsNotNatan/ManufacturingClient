@@ -3,26 +3,25 @@
    ========================================== */
 
 /* 1. A BARRA PRINCIPAL */
-/* Usamos display: flex para colocar os itens lado a lado */
 .app-header {
     background-color: #ffffff;
     border-bottom: 1px solid #e2e8f0;
     padding: 0 2rem;
     height: 70px;
+    width: 100%;
+    /* ADICIONADO: Garante que vai de ponta a ponta */
+    box-sizing: border-box;
+    /* ADICIONADO: Mantém o padding seguro */
     display: flex;
     justify-content: space-between;
-    /* Empurra o logo para a esquerda e o resto para a direita */
     align-items: center;
-    /* Centra os itens verticalmente */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     position: sticky;
-    /* Mantém a barra colada no topo quando fazemos scroll */
     top: 0;
     z-index: 50;
-    /* Garante que a barra fica por cima de outros elementos */
 }
 
-/* 2. IDENTIDADE VISUAL (LOGO E NOME) */
+/* O resto do teu código Navbar.css fica exatamente igual... */
 .logo-container {
     display: flex;
     align-items: center;
@@ -34,10 +33,8 @@
 
 .text-primary {
     color: #2563eb;
-    /* O nosso azul principal */
 }
 
-/* A pequena etiqueta ao lado do nome do projeto */
 .badge-role {
     background-color: #eff6ff;
     color: #2563eb;
@@ -49,12 +46,10 @@
     border: 1px solid #bfdbfe;
 }
 
-/* 3. OS LINKS DE NAVEGAÇÃO */
 .nav-links {
     display: flex;
     gap: 2rem;
     height: 100%;
-    /* Ocupa a altura total da barra para a linha azul ficar no fundo */
 }
 
 .nav-item {
@@ -62,36 +57,28 @@
     align-items: center;
     gap: 0.5rem;
     text-decoration: none;
-    /* Remove o sublinhado padrão dos links HTML */
     color: #64748b;
     font-weight: 600;
     font-size: 0.95rem;
     height: 100%;
     border-bottom: 3px solid transparent;
-    /* Margem invisível para não dar saltos de ecrã */
     transition: all 0.2s ease;
-    /* Faz a mudança de cor ser suave */
 }
 
-/* Efeito ao passar o rato (Hover) */
 .nav-item:hover {
     color: #2563eb;
 }
 
-/* Estado Ativo (página atual) - Injetado automaticamente pelo <NavLink> do React */
 .nav-item.active {
     color: #2563eb;
     border-bottom: 3px solid #2563eb;
-    /* A linha azul que indica onde estamos */
 }
 
-/* 4. AVISO DE PORTAL INTERNO À DIREITA */
 .user-profile {
     display: flex;
     align-items: center;
     padding-left: 1rem;
     border-left: 1px solid #e2e8f0;
-    /* Uma pequena linha vertical de separação */
 }
 
 .user-info span {
