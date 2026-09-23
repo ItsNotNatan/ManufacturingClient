@@ -1,9 +1,9 @@
 /* src/pages/Acompanhamento/Acompanhamento.css */
-
 .acompanhamento-container {
     max-width: 1200px;
     margin: 0 auto;
     animation: fadeIn 0.4s ease-in-out forwards;
+    padding: 2rem;
 }
 
 .acompanhamento-header {
@@ -16,17 +16,16 @@
 .acompanhamento-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-dark);
+    color: #1f2937;
 }
 
-/* Barra de Pesquisa e Filtros */
 .acompanhamento-actions {
     display: flex;
     gap: 1rem;
     background: white;
     padding: 1rem;
     border-radius: 0.5rem;
-    border: 1px solid var(--border);
+    border: 1px solid #e5e7eb;
     margin-bottom: 1.5rem;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
@@ -35,8 +34,8 @@
     display: flex;
     align-items: center;
     flex: 1;
-    background: var(--bg-page);
-    border: 1px solid var(--border);
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
     border-radius: 0.5rem;
     padding: 0 0.8rem;
 }
@@ -51,14 +50,13 @@
 }
 
 .search-box i {
-    color: var(--text-muted);
+    color: #6b7280;
 }
 
-/* Tabela de Acompanhamento */
 .table-container {
     background: white;
     border-radius: 0.5rem;
-    border: 1px solid var(--border);
+    border: 1px solid #e5e7eb;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -70,19 +68,19 @@
 }
 
 .tracking-table th {
-    background-color: var(--bg-box);
+    background-color: #f9fafb;
     padding: 1rem;
     font-weight: 600;
     color: #374151;
     font-size: 0.875rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .tracking-table td {
     padding: 1rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #e5e7eb;
     font-size: 0.9rem;
-    color: var(--text-dark);
+    color: #1f2937;
     vertical-align: middle;
 }
 
@@ -90,11 +88,22 @@
     border-bottom: none;
 }
 
-.tracking-table tr:hover {
+/* LINHAS INTERATIVAS */
+.linha-clicavel {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    user-select: none;
+}
+
+.linha-clicavel:hover {
     background-color: #f8fafc;
 }
 
-/* Badges de Status */
+.linha-clicavel:active {
+    background-color: #f1f5f9;
+}
+
+/* BADGES DE STATUS */
 .status-badge {
     padding: 0.3rem 0.8rem;
     border-radius: 2rem;
@@ -122,77 +131,7 @@
     border: 1px solid #bbf7d0;
 }
 
-.btn-icon {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 0.4rem;
-    border-radius: 0.3rem;
-    transition: all 0.2s;
-}
-
-.btn-icon:hover {
-    background: var(--bg-page);
-    color: var(--primary);
-}
-
-/* ==========================================
-   ADICIONA ISTO NO FINAL DO Acompanhamento.css
-   ========================================== */
-
-/* 1. Estilo para a linha interativa da tabela */
-.linha-clicavel {
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    user-select: none;
-    /* Evita que o texto seja selecionado acidentalmente no duplo clique */
-}
-
-.linha-clicavel:hover {
-    background-color: #f8fafc;
-}
-
-.linha-clicavel:active {
-    background-color: #f1f5f9;
-}
-
-/* 2. Etiqueta (Badge) para mostrar a Fase Atual na tabela */
-.badge-fase {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.3rem 0.8rem;
-    border-radius: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-}
-
-/* ==========================================
-   ADICIONA ISTO NO FINAL DO Acompanhamento.css
-   ========================================== */
-
-/* 1. Estilo para a linha interativa da tabela */
-.linha-clicavel {
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    user-select: none;
-    /* Evita que o texto seja selecionado acidentalmente no duplo clique */
-}
-
-.linha-clicavel:hover {
-    background-color: #f8fafc;
-}
-
-.linha-clicavel:active {
-    background-color: #f1f5f9;
-}
-
-/* 2. Etiqueta (Badge) para mostrar a Fase Atual na tabela */
+/* BADGE DA FASE ATUAL */
 .badge-fase {
     display: inline-flex;
     align-items: center;
