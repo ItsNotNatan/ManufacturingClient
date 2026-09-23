@@ -1,11 +1,20 @@
 // src/pages/Formulario/Formulario.jsx
 import React, { useState } from 'react';
-import { FilePlus, Send, LayoutTemplate, UploadCloud, ListChecks, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import {
+    FilePlus,
+    Send,
+    LayoutTemplate,
+    UploadCloud,
+    ListChecks,
+    ExternalLink,
+    Image as ImageIcon
+} from 'lucide-react';
 import './Formulario.css';
 
 export default function Formulario() {
     const [carregandoPdf, setCarregandoPdf] = useState(false);
 
+    // Estado centralizado para guardar todas as informações do formulário
     const [dados, setDados] = useState({
         tipoSolicitacao: 'transmissao',
         remetente: '',
@@ -20,17 +29,20 @@ export default function Formulario() {
         itensConstrutivos: []
     });
 
+    // Atualiza os campos de texto gerais do formulário
     const lidarComMudanca = (e) => {
         const { name, value } = e.target;
         setDados(prev => ({ ...prev, [name]: value }));
     };
 
+    // Atualiza um campo específico dentro de um item da tabela
     const lidarMudancaItem = (index, campo, valor) => {
         const novosItens = [...dados.itensConstrutivos];
         novosItens[index][campo] = valor;
         setDados(prev => ({ ...prev, itensConstrutivos: novosItens }));
     };
 
+    // Simula a receção dos dados do Backend após o upload do PDF
     const handleUploadPDF = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -50,28 +62,23 @@ export default function Formulario() {
                 dataData: '2026-03-28',
                 linkSyncplicity: 'https://comau.syncplicity.com/Files/Default.aspx#home/1/9021399/COMPRAS/BWA/-%20VOLKSWAGEM/BRBCBBB37%20-%20VW%20ANCHIETA%20STW%20UB2/Transmiss%C3%B5es/BB37-VW-ANCH-STW-UB2-0143-2025',
                 itensConstrutivos: [
-                    // Adicionada a propriedade imagemSimulada
-                    { id: 1, imagemSimulada: true, descricao: 'CONSOLE P/ PINÇA DE SOLDA ST2220', codigo: '51-38N_578227', qtd: '01DX+01EX' },
-                    { id: 2, imagemSimulada: true, descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578229', qtd: '01' },
-                    { id: 3, imagemSimulada: true, descricao: 'CONSOLE P/ PINO TUCKER ST2790', codigo: '51-38N_578231', qtd: '01' },
-                    { id: 4, imagemSimulada: true, descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578233', qtd: '01' },
-                    { id: 5, imagemSimulada: true, descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578235', qtd: '01' },
-                    { id: 6, imagemSimulada: true, descricao: 'CONSOLE P/ PINO TUCKER ST2790', codigo: '51-38N_578237', qtd: '01' },
-                    { id: 7, imagemSimulada: true, descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578239', qtd: '01' },
-                    { id: 8, imagemSimulada: true, descricao: 'CONSOLE P/PINO TUCKER ST2840', codigo: '51-38N_578247', qtd: '01' },
-                    { id: 9, imagemSimulada: true, descricao: 'CONSOLE P/PINO TUCKER ST2840', codigo: '51-38N_578249', qtd: '01' },
-                    { id: 10, imagemSimulada: true, descricao: 'CONSOLE P/ PINO TUCKER ST2850', codigo: '51-38N_578253', qtd: '01' },
-                    { id: 11, imagemSimulada: true, descricao: 'CONSOLE P/PINO TUCKER ST2850', codigo: '51-38N_578255', qtd: '01' }
+                    { id: 1, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/ PINÇA DE SOLDA ST2220', codigo: '51-38N_578227', qtd: '01DX+01EX' },
+                    { id: 2, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578229', qtd: '01' },
+                    { id: 3, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/ PINO TUCKER ST2790', codigo: '51-38N_578231', qtd: '01' },
+                    { id: 4, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578233', qtd: '01' },
+                    { id: 5, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578235', qtd: '01' },
+                    { id: 6, urlImagem: '', descricao: 'CONSOLE P/ PINO TUCKER ST2790', codigo: '51-38N_578237', qtd: '01' }
                 ]
             }));
             setCarregandoPdf(false);
         }, 1500);
     };
 
+    // Função para submeter o formulário
     const lidarComEnvio = (e) => {
         e.preventDefault();
         alert('Solicitação de Transmissão criada com sucesso!');
-        console.log(dados);
+        console.log("Dados a enviar para o Backend:", dados);
     };
 
     return (
@@ -83,19 +90,19 @@ export default function Formulario() {
 
             <form onSubmit={lidarComEnvio} className="formulario-card">
 
-                {/* UPLOAD DO PDF */}
+                {/* SECÇÃO: UPLOAD DO PDF */}
                 <div className="form-section upload-section">
                     <div className="upload-box">
                         <UploadCloud size={40} color="#6b7280" />
                         <p>Clique ou arraste a Transmissão de Desenhos (PDF) aqui</p>
                         <input type="file" accept=".pdf" onChange={handleUploadPDF} className="file-input" />
-                        {carregandoPdf && <p className="loading-text">A extrair dados do PDF...</p>}
+                        {carregandoPdf && <p className="loading-text">A extrair imagens e dados do PDF...</p>}
                     </div>
                 </div>
 
                 <hr className="divider" />
 
-                {/* CABEÇALHO DO DOCUMENTO */}
+                {/* SECÇÃO: CABEÇALHO DO DOCUMENTO */}
                 <div className="form-section">
                     <h3 className="section-title"><LayoutTemplate size={20} /> Informações do Cabeçalho</h3>
                     <div className="formulario-grid">
@@ -132,7 +139,7 @@ export default function Formulario() {
                             <input type="date" name="dataData" value={dados.dataData} onChange={lidarComMudanca} />
                         </div>
 
-                        {/* Link Syncplicity */}
+                        {/* SECÇÃO: Link Syncplicity */}
                         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                             <label>Documentação de Referência (Syncplicity)</label>
                             <div style={{ display: 'flex', gap: '10px' }}>
@@ -166,12 +173,12 @@ export default function Formulario() {
 
                 <hr className="divider" />
 
-                {/* TABELA DE ITENS CONSTRUTIVOS COM COLUNA IMAGEM */}
+                {/* SECÇÃO: TABELA DE ITENS */}
                 <div className="form-section">
                     <h3 className="section-title"><ListChecks size={20} /> Itens para Construção (Extraídos do PDF)</h3>
 
                     {dados.itensConstrutivos.length === 0 ? (
-                        <p className="empty-message">Nenhum item carregado. Faça o upload do PDF.</p>
+                        <p className="empty-message">Nenhum item carregado. Faça o upload do PDF para visualizar a tabela.</p>
                     ) : (
                         <div className="table-container">
                             <table className="itens-table">
@@ -190,14 +197,22 @@ export default function Formulario() {
                                             <td style={{ textAlign: 'center', fontWeight: 'bold', color: '#6b7280' }}>
                                                 {item.id}
                                             </td>
-                                            <td>
-                                                <button
-                                                    type="button"
-                                                    className="btn-table-img"
-                                                    title={item.imagemSimulada ? "Ver Imagem" : "Fazer upload da Imagem"}
-                                                >
-                                                    <ImageIcon size={20} />
-                                                </button>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {item.urlImagem ? (
+                                                    <img
+                                                        src={item.urlImagem}
+                                                        alt={`Item ${item.id}`}
+                                                        style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                                                    />
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className="btn-table-img"
+                                                        title="A imagem não foi encontrada. Clique para fazer upload manual."
+                                                    >
+                                                        <ImageIcon size={20} />
+                                                    </button>
+                                                )}
                                             </td>
                                             <td>
                                                 <input
