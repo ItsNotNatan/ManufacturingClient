@@ -49,6 +49,9 @@ export default function Formulario() {
 
         setCarregandoPdf(true);
 
+        // Imagem SVG verde embutida diretamente no código (não falha nem precisa de internet)
+        const imgPlaceholder = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect width='50' height='50' fill='%2322c55e' rx='6'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='white' font-weight='bold' text-anchor='middle' alignment-baseline='middle' font-family='sans-serif'%3ECAD%3C/text%3E%3C/svg%3E";
+
         setTimeout(() => {
             setDados(prev => ({
                 ...prev,
@@ -62,11 +65,11 @@ export default function Formulario() {
                 dataData: '2026-03-28',
                 linkSyncplicity: 'https://comau.syncplicity.com/Files/Default.aspx#home/1/9021399/COMPRAS/BWA/-%20VOLKSWAGEM/BRBCBBB37%20-%20VW%20ANCHIETA%20STW%20UB2/Transmiss%C3%B5es/BB37-VW-ANCH-STW-UB2-0143-2025',
                 itensConstrutivos: [
-                    { id: 1, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/ PINÇA DE SOLDA ST2220', codigo: '51-38N_578227', qtd: '01DX+01EX' },
-                    { id: 2, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578229', qtd: '01' },
-                    { id: 3, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/ PINO TUCKER ST2790', codigo: '51-38N_578231', qtd: '01' },
-                    { id: 4, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578233', qtd: '01' },
-                    { id: 5, urlImagem: 'https://via.placeholder.com/50/e5e7eb/6b7280?text=IMG', descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578235', qtd: '01' },
+                    { id: 1, urlImagem: imgPlaceholder, descricao: 'CONSOLE P/ PINÇA DE SOLDA ST2220', codigo: '51-38N_578227', qtd: '01DX+01EX' },
+                    { id: 2, urlImagem: imgPlaceholder, descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578229', qtd: '01' },
+                    { id: 3, urlImagem: imgPlaceholder, descricao: 'CONSOLE P/ PINO TUCKER ST2790', codigo: '51-38N_578231', qtd: '01' },
+                    { id: 4, urlImagem: imgPlaceholder, descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578233', qtd: '01' },
+                    { id: 5, urlImagem: imgPlaceholder, descricao: 'CONSOLE P/PINO TUCKER ST2790', codigo: '51-38N_578235', qtd: '01' },
                     { id: 6, urlImagem: '', descricao: 'CONSOLE P/ PINO TUCKER ST2790', codigo: '51-38N_578237', qtd: '01' }
                 ]
             }));
@@ -203,6 +206,10 @@ export default function Formulario() {
                                                         src={item.urlImagem}
                                                         alt={`Item ${item.id}`}
                                                         style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                                                        onError={(e) => {
+                                                            // Se a imagem falhar ao carregar, esconde o ícone quebrado
+                                                            e.target.style.display = 'none';
+                                                        }}
                                                     />
                                                 ) : (
                                                     <button
