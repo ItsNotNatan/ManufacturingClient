@@ -67,7 +67,7 @@ export default function Acompanhamento() {
                 <div>
                     <h2 className="acompanhamento-title">
                         <LayoutDashboard color="#2563eb" size={28} />
-                        Acompanhamento de Projetos
+                        Acompanhamento de Processos
                     </h2>
                     <p style={{ color: '#64748b', fontSize: '0.95rem', marginTop: '0.5rem' }}>
                         Dê um duplo clique numa linha para abrir os detalhes da transmissão e interagir com o fluxo.
