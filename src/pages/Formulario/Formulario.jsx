@@ -16,7 +16,7 @@ export default function Formulario() {
 
     // Estado centralizado para guardar todas as informações do formulário
     const [dados, setDados] = useState({
-        tipoSolicitacao: 'transmissao',
+        tipoSolicitacao: 'transmissao', // Começa por defeito como Transmissão
         remetente: '',
         destinatario: '',
         objeto: '',
@@ -80,18 +80,53 @@ export default function Formulario() {
     // Função para submeter o formulário
     const lidarComEnvio = (e) => {
         e.preventDefault();
-        alert('Solicitação de Transmissão criada com sucesso!');
+        alert(`Solicitação de ${dados.tipoSolicitacao === 'transmissao' ? 'Transmissão' : 'Eventual'} criada com sucesso!`);
         console.log("Dados a enviar para o Backend:", dados);
     };
 
     return (
         <div className="formulario-container">
             <div className="formulario-header">
-                <h2 className="formulario-title"><FilePlus size={28} color="#2563eb" /> Nova Solicitação de Transmissão</h2>
+                {/* O título muda dinamicamente com base na seleção */}
+                <h2 className="formulario-title">
+                    <FilePlus size={28} color="#2563eb" />
+                    Nova Solicitação: {dados.tipoSolicitacao === 'transmissao' ? 'Transmissão' : 'Eventual'}
+                </h2>
                 <p>Faça o upload do documento PDF para auto-preencher os dados de construção e engenharia.</p>
             </div>
 
             <form onSubmit={lidarComEnvio} className="formulario-card">
+
+                {/* SECÇÃO: TIPO DE SOLICITAÇÃO */}
+                <div className="form-section">
+                    <h3 className="section-title">1. Tipo de Solicitação</h3>
+                    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', padding: '0.5rem 0' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '1.05rem', fontWeight: '500', color: '#374151' }}>
+                            <input
+                                type="radio"
+                                name="tipoSolicitacao"
+                                value="transmissao"
+                                checked={dados.tipoSolicitacao === 'transmissao'}
+                                onChange={lidarComMudanca}
+                                style={{ width: '18px', height: '18px', accentColor: '#2563eb' }}
+                            />
+                            Transmissão de Desenhos
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '1.05rem', fontWeight: '500', color: '#374151' }}>
+                            <input
+                                type="radio"
+                                name="tipoSolicitacao"
+                                value="eventual"
+                                checked={dados.tipoSolicitacao === 'eventual'}
+                                onChange={lidarComMudanca}
+                                style={{ width: '18px', height: '18px', accentColor: '#2563eb' }}
+                            />
+                            Eventual
+                        </label>
+                    </div>
+                </div>
+
+                <hr className="divider" />
 
                 {/* SECÇÃO: UPLOAD DO PDF */}
                 <div className="form-section upload-section">
@@ -207,7 +242,6 @@ export default function Formulario() {
                                                         alt={`Item ${item.id}`}
                                                         style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #d1d5db' }}
                                                         onError={(e) => {
-                                                            // Se a imagem falhar ao carregar, esconde o ícone quebrado
                                                             e.target.style.display = 'none';
                                                         }}
                                                     />

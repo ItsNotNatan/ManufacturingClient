@@ -1,64 +1,132 @@
-/* src/pages/Acompanhamento/Acompanhamento.css */
+/* =================================================================
+   ARQUIVO: src/pages/Acompanhamento/Acompanhamento.css
+   DESCRIÇÃO: Estilos premium para a página de acompanhamento
+   ================================================================= */
+
 .acompanhamento-container {
     max-width: 1200px;
     margin: 0 auto;
     animation: fadeIn 0.4s ease-in-out forwards;
     padding: 2rem;
+    font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* --- Cabeçalho e Título --- */
 .acompanhamento-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     margin-bottom: 2rem;
 }
 
 .acompanhamento-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1f2937;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
+/* --- Cartões de Resumo (KPIs) --- */
+.kpi-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-icon-box {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kpi-details h4 {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.kpi-details span {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+/* --- Área de Pesquisa --- */
 .acompanhamento-actions {
     display: flex;
     gap: 1rem;
-    background: white;
+    background: #ffffff;
     padding: 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
     margin-bottom: 1.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .search-box {
     display: flex;
     align-items: center;
     flex: 1;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 0 0.8rem;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0 1rem;
+    transition: border-color 0.2s;
+}
+
+.search-box:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-box input {
     width: 100%;
-    padding: 0.6rem;
+    padding: 0.75rem;
     border: none;
     background: transparent;
     outline: none;
     font-size: 0.95rem;
+    color: #0f172a;
 }
 
 .search-box i {
-    color: #6b7280;
+    color: #64748b;
 }
 
+/* --- Tabela Premium --- */
 .table-container {
-    background: white;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .tracking-table {
@@ -68,19 +136,21 @@
 }
 
 .tracking-table th {
-    background-color: #f9fafb;
-    padding: 1rem;
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.875rem;
-    border-bottom: 1px solid #e5e7eb;
+    background-color: #f8fafc;
+    padding: 1.25rem 1.5rem;
+    font-weight: 700;
+    color: #475569;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .tracking-table td {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
     font-size: 0.9rem;
-    color: #1f2937;
+    color: #1e293b;
     vertical-align: middle;
 }
 
@@ -88,60 +158,90 @@
     border-bottom: none;
 }
 
-/* LINHAS INTERATIVAS */
 .linha-clicavel {
     cursor: pointer;
     transition: background-color 0.2s ease;
-    user-select: none;
 }
 
 .linha-clicavel:hover {
     background-color: #f8fafc;
 }
 
-.linha-clicavel:active {
-    background-color: #f1f5f9;
-}
-
-/* BADGES DE STATUS */
+/* --- Status Badges (Mais vivos) --- */
 .status-badge {
-    padding: 0.3rem 0.8rem;
+    padding: 0.4rem 1rem;
     border-radius: 2rem;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .status-pendente {
-    background: #fef3c7;
-    color: #d97706;
+    background: #fffbeb;
+    color: #b45309;
     border: 1px solid #fde68a;
 }
 
 .status-transito {
-    background: #e0f2fe;
-    color: #0284c7;
-    border: 1px solid #bae6fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
 }
 
 .status-concluido {
-    background: #dcfce3;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
 }
 
-/* BADGE DA FASE ATUAL */
 .badge-fase {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.3rem 0.8rem;
-    border-radius: 0.5rem;
-    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 800;
-    text-transform: uppercase;
     background-color: #f1f5f9;
-    color: #475569;
+    color: #334155;
     border: 1px solid #e2e8f0;
+}
+
+/* --- Barra de Progresso --- */
+.progress-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.progress-track {
+    width: 100%;
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.8s ease-out;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.progress-percentage {
+    color: #0f172a;
+}
+
+.progress-phase-name {
+    color: #64748b;
 }
