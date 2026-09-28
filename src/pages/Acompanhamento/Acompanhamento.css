@@ -245,3 +245,56 @@
 .progress-phase-name {
     color: #64748b;
 }
+
+/* --- Barra de Progresso Segmentada (NOVO) --- */
+.progress-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.progress-percentage {
+    color: #0f172a;
+}
+
+.progress-phase-name {
+    color: #64748b;
+}
+
+/* Container com os 3 blocos */
+.multi-progress-wrapper {
+    display: flex;
+    gap: 4px;
+    height: 8px;
+    margin: 4px 0;
+}
+
+.multi-progress-segment {
+    flex: 1;
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.multi-progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.8s ease-out;
+}
+
+/* Legendas pequenas abaixo da barra */
+.multi-progress-legends {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #cbd5e1;
+    text-transform: uppercase;
+}
