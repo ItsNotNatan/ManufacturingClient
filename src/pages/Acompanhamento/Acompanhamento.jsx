@@ -1,27 +1,35 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel de acompanhamento com Paginação (10 itens), Projetos Cancelados e Barra Dinâmica
+// DESCRIÇÃO: Painel com Filtros Dinâmicos, Paginação, Status e Fundo Escuro Modular
 // =================================================================
 import React, { useState, useEffect } from 'react';
 import {
     Search, Filter, Briefcase, LayoutDashboard,
     TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck, XCircle,
-    ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight, X
 } from 'lucide-react';
 
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
+import FundoEscuro from '../../components/FundoEscuro/FundoEscuro';
 import './Acompanhamento.css';
 
 export default function Acompanhamento() {
+    // Estados base
     const [pesquisa, setPesquisa] = useState('');
     const [itemSelecionado, setItemSelecionado] = useState(null);
 
-    // ✨ ESTADOS DE PAGINAÇÃO
+    // ESTADOS DOS FILTROS
+    const [mostrarFiltros, setMostrarFiltros] = useState(false);
+    const [filtroFase, setFiltroFase] = useState('todas');
+    const [filtroStatus, setFiltroStatus] = useState('todos');
+    const [filtroScl, setFiltroScl] = useState('todos');
+    const [filtroCc, setFiltroCc] = useState('todos');
+
+    // ESTADOS DE PAGINAÇÃO
     const [paginaAtual, setPaginaAtual] = useState(1);
-    // Limite alterado para 10 itens por página!
     const itensPorPagina = 10;
 
-    // MOCK DATA: Adicionados mais itens para ultrapassar os 10 e ativar a paginação
+    // MOCK DATA
     const [solicitacoes] = useState([
         { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50 },
         { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30 },
@@ -29,8 +37,6 @@ export default function Acompanhamento() {
         { id: 'EV1322-SUPORTE-SENSOR-V2', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 100 },
         { id: 'EV1400-ESTRUTURA-BASE-A', scl: 'Tiago Mendes', centroCusto: 'BRBCBBA60', nomeCentroCusto: 'NOVO CHASSI JEEP', status: 'cancelado', faseAtual: 1, progresso: 15 },
         { id: 'VW200-PORTA-TRAS-0021-2026', scl: 'Luísa Marques', centroCusto: 'BRBCBBA61', nomeCentroCusto: 'VW POLO PORTAS', status: 'cancelado', faseAtual: 2, progresso: 40 },
-
-        // --- Novos itens adicionados para forçar a paginação (total = 11 itens) ---
         { id: 'VW427-PATAGONIA-0042-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 20 },
         { id: 'VW427-PATAGONIA-0043-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 90 },
         { id: 'BB37-VW-ANCH-UB2-0004-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 10 },
@@ -38,30 +44,22 @@ export default function Acompanhamento() {
         { id: 'EV1500-MAQUINA-TESTE-B', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'pendente', faseAtual: 1, progresso: 5 },
     ]);
 
-    // Sempre que o utilizador faz uma nova pesquisa, voltamos à página 1
+    // Extração dinâmica de opções para os filtros de SCL e Centro de Custo
+    const responsaveisUnicos = [...new Set(solicitacoes.map(item => item.scl))].sort();
+    const centrosCustoUnicos = [...new Set(solicitacoes.map(item => item.centroCusto))].sort();
+
+    // Sempre que aplicarmos um filtro ou pesquisarmos, a tabela volta à página 1
     useEffect(() => {
         setPaginaAtual(1);
-    }, [pesquisa]);
+    }, [pesquisa, filtroFase, filtroStatus, filtroScl, filtroCc]);
 
     const getStatusInfo = (faseAtual, progresso, statusGeral) => {
-        if (statusGeral === 'cancelado') {
-            return { classe: 'status-cancelado', texto: 'Cancelado', icone: <XCircle size={14} /> };
-        }
-        if (faseAtual === 3 && progresso === 100) {
-            return { classe: 'status-concluido', texto: 'Projeto Concluído', icone: <CheckCircle2 size={14} /> };
-        }
+        if (statusGeral === 'cancelado') return { classe: 'status-cancelado', texto: 'Cancelado', icone: <XCircle size={14} /> };
+        if (faseAtual === 3 && progresso === 100) return { classe: 'status-concluido', texto: 'Projeto Concluído', icone: <CheckCircle2 size={14} /> };
         if (faseAtual === 1) return { classe: 'status-pendente', texto: 'Em Orçamento', icone: <Calculator size={14} /> };
         if (faseAtual === 2) return { classe: 'status-transito', texto: 'Em Planejamento', icone: <CalendarCheck size={14} /> };
         if (faseAtual === 3) return { classe: 'status-concluido', texto: 'Em Manufatura', icone: <Factory size={14} /> };
-
         return { classe: 'status-pendente', texto: 'Desconhecido', icone: <Briefcase size={14} /> };
-    };
-
-    const getNomeDaFase = (fase) => {
-        if (fase === 1) return 'Orçamento';
-        if (fase === 2) return 'Planejamento';
-        if (fase === 3) return 'Manufatura';
-        return 'Concluído';
     };
 
     const getProgressoSegmento = (faseDoSegmento, faseAtual, progressoNaFaseAtual) => {
@@ -83,36 +81,53 @@ export default function Acompanhamento() {
         return Math.round(progressoTotal);
     };
 
-    // 1. Filtramos todos os dados com base na pesquisa
-    const solicitacoesFiltradas = solicitacoes.filter(item =>
-        item.id.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        item.scl.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        item.centroCusto.toLowerCase().includes(pesquisa.toLowerCase())
-    );
-
-    // 2. CÁLCULOS DE PAGINAÇÃO
-    const indiceUltimoItem = paginaAtual * itensPorPagina;
-    const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
-
-    // Extrai apenas os itens que pertencem à página atual
-    const itensAtuais = solicitacoesFiltradas.slice(indicePrimeiroItem, indiceUltimoItem);
-
-    // Calcula o total de páginas
-    const totalPaginas = Math.ceil(solicitacoesFiltradas.length / itensPorPagina);
-
-    // Função para mudar de página
-    const mudarPagina = (numeroPagina) => {
-        if (numeroPagina > 0 && numeroPagina <= totalPaginas) {
-            setPaginaAtual(numeroPagina);
-        }
+    const limparFiltros = () => {
+        setFiltroFase('todas');
+        setFiltroStatus('todos');
+        setFiltroScl('todos');
+        setFiltroCc('todos');
+        setMostrarFiltros(false);
     };
 
+    // LÓGICA DE FILTRAGEM MULTIPLA
+    const solicitacoesFiltradas = solicitacoes.filter(item => {
+        const matchPesquisa = item.id.toLowerCase().includes(pesquisa.toLowerCase()) ||
+            item.scl.toLowerCase().includes(pesquisa.toLowerCase()) ||
+            item.centroCusto.toLowerCase().includes(pesquisa.toLowerCase());
+
+        const matchFase = filtroFase === 'todas' || item.faseAtual.toString() === filtroFase;
+        const matchScl = filtroScl === 'todos' || item.scl === filtroScl;
+        const matchCc = filtroCc === 'todos' || item.centroCusto === filtroCc;
+
+        let matchStatus = true;
+        if (filtroStatus === 'cancelado') matchStatus = item.status === 'cancelado';
+        else if (filtroStatus === 'concluido') matchStatus = item.status !== 'cancelado' && item.faseAtual === 3 && item.progresso === 100;
+        else if (filtroStatus === 'ativos') matchStatus = item.status !== 'cancelado' && !(item.faseAtual === 3 && item.progresso === 100);
+
+        return matchPesquisa && matchFase && matchStatus && matchScl && matchCc;
+    });
+
+    // CÁLCULOS DE PAGINAÇÃO
+    const indiceUltimoItem = paginaAtual * itensPorPagina;
+    const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
+    const itensAtuais = solicitacoesFiltradas.slice(indicePrimeiroItem, indiceUltimoItem);
+    const totalPaginas = Math.ceil(solicitacoesFiltradas.length / itensPorPagina);
+
+    const mudarPagina = (numeroPagina) => {
+        if (numeroPagina > 0 && numeroPagina <= totalPaginas) setPaginaAtual(numeroPagina);
+    };
+
+    // KPIs Globais
     const totalPedidos = solicitacoes.length;
     const emProgresso = solicitacoes.filter(s => s.faseAtual < 3 && s.status !== 'cancelado').length;
     const emManufatura = solicitacoes.filter(s => s.faseAtual === 3 && s.status !== 'cancelado').length;
 
+    // Detetar se há algum filtro ativo para mudar a cor do botão
+    const temFiltroAtivo = filtroFase !== 'todas' || filtroStatus !== 'todos' || filtroScl !== 'todos' || filtroCc !== 'todos';
+
     return (
         <div className="acompanhamento-container">
+            {/* CABEÇALHO */}
             <div className="acompanhamento-header">
                 <div>
                     <h2 className="acompanhamento-title">
@@ -156,7 +171,7 @@ export default function Acompanhamento() {
                 </div>
             </div>
 
-            {/* BARRA DE PESQUISA */}
+            {/* BARRA DE PESQUISA E BOTÃO DE FILTROS */}
             <div className="acompanhamento-actions">
                 <div className="search-box">
                     <Search size={18} />
@@ -167,9 +182,77 @@ export default function Acompanhamento() {
                         onChange={(e) => setPesquisa(e.target.value)}
                     />
                 </div>
-                <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff', border: '1px solid #cbd5e1', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', cursor: 'pointer', fontWeight: 'bold', color: '#334155' }}>
-                    <Filter size={18} /> Filtrar
-                </button>
+
+                {/* ✨ MENU DE FILTROS FLUTUANTE COM FUNDO ESCURO */}
+                {mostrarFiltros && (
+                    <FundoEscuro aoFechar={() => setMostrarFiltros(false)} zIndex={40} opacidade={0.4} />
+                )}
+
+                <div className="filter-container" style={{ position: 'relative', zIndex: mostrarFiltros ? 50 : 1 }}>
+                    <button
+                        className="btn btn-outline"
+                        onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff',
+                            border: `1px solid ${mostrarFiltros || temFiltroAtivo ? '#3b82f6' : '#cbd5e1'}`,
+                            padding: '0.75rem 1.5rem', borderRadius: '0.75rem', cursor: 'pointer',
+                            fontWeight: 'bold', color: mostrarFiltros || temFiltroAtivo ? '#2563eb' : '#334155'
+                        }}
+                    >
+                        {mostrarFiltros ? <X size={18} /> : <Filter size={18} />}
+                        Filtros {temFiltroAtivo && '(Ativos)'}
+                    </button>
+
+                    {mostrarFiltros && (
+                        <div className="filter-dropdown">
+                            <div className="filter-group">
+                                <label>Fase do Projeto</label>
+                                <select className="filter-select" value={filtroFase} onChange={(e) => setFiltroFase(e.target.value)}>
+                                    <option value="todas">Todas as Fases</option>
+                                    <option value="1">Fase 1: Orçamento</option>
+                                    <option value="2">Fase 2: Planejamento</option>
+                                    <option value="3">Fase 3: Manufatura</option>
+                                </select>
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Status Geral</label>
+                                <select className="filter-select" value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}>
+                                    <option value="todos">Todos os Status</option>
+                                    <option value="ativos">Apenas Ativos (Em Andamento)</option>
+                                    <option value="concluido">Apenas Concluídos (100%)</option>
+                                    <option value="cancelado">Apenas Cancelados</option>
+                                </select>
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Responsável (SCL)</label>
+                                <select className="filter-select" value={filtroScl} onChange={(e) => setFiltroScl(e.target.value)}>
+                                    <option value="todos">Todos os SCLs</option>
+                                    {responsaveisUnicos.map((resp, index) => (
+                                        <option key={index} value={resp}>{resp}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="filter-group">
+                                <label>Centro de Custo</label>
+                                <select className="filter-select" value={filtroCc} onChange={(e) => setFiltroCc(e.target.value)}>
+                                    <option value="todos">Todos os Centros de Custo</option>
+                                    {centrosCustoUnicos.map((cc, index) => (
+                                        <option key={index} value={cc}>{cc}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="filter-actions">
+                                <button className="btn-limpar-filtros" onClick={limparFiltros}>
+                                    Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* TABELA DE DADOS */}
@@ -267,38 +350,22 @@ export default function Acompanhamento() {
                     </tbody>
                 </table>
 
-                {/* CONTROLES DE PAGINAÇÃO NO RODAPÉ DA TABELA */}
+                {/* CONTROLES DE PAGINAÇÃO */}
                 {totalPaginas > 1 && (
                     <div className="pagination-container">
                         <div className="pagination-info">
                             Mostrando de <strong>{indicePrimeiroItem + 1}</strong> a <strong>{Math.min(indiceUltimoItem, solicitacoesFiltradas.length)}</strong> de <strong>{solicitacoesFiltradas.length}</strong> projetos
                         </div>
                         <div className="pagination-controls">
-                            <button
-                                className="btn-page"
-                                onClick={() => mudarPagina(paginaAtual - 1)}
-                                disabled={paginaAtual === 1}
-                                title="Página Anterior"
-                            >
+                            <button className="btn-page" onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} title="Página Anterior">
                                 <ChevronLeft size={16} />
                             </button>
-
                             {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(num => (
-                                <button
-                                    key={num}
-                                    className={`btn-page ${paginaAtual === num ? 'active' : ''}`}
-                                    onClick={() => mudarPagina(num)}
-                                >
+                                <button key={num} className={`btn-page ${paginaAtual === num ? 'active' : ''}`} onClick={() => mudarPagina(num)}>
                                     {num}
                                 </button>
                             ))}
-
-                            <button
-                                className="btn-page"
-                                onClick={() => mudarPagina(paginaAtual + 1)}
-                                disabled={paginaAtual === totalPaginas}
-                                title="Próxima Página"
-                            >
+                            <button className="btn-page" onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} title="Próxima Página">
                                 <ChevronRight size={16} />
                             </button>
                         </div>
@@ -307,10 +374,7 @@ export default function Acompanhamento() {
             </div>
 
             {itemSelecionado && (
-                <ModalDetalhes
-                    item={itemSelecionado}
-                    aoFechar={() => setItemSelecionado(null)}
-                />
+                <ModalDetalhes item={itemSelecionado} aoFechar={() => setItemSelecionado(null)} />
             )}
         </div>
     );

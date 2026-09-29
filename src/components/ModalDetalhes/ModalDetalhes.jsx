@@ -1,10 +1,12 @@
 // =================================================================
 // ARQUIVO: src/components/ModalDetalhes/ModalDetalhes.jsx
-// DESCRIÇÃO: Componente de janela flutuante utilizando React Portals com Data Prevista
+// DESCRIÇÃO: Componente de janela flutuante utilizando o módulo FundoEscuro
 // =================================================================
 import React from 'react';
-import { createPortal } from 'react-dom';
-import { X, Check, Calendar, User } from 'lucide-react'; // Novos ícones importados
+import { X, Check, Calendar, User } from 'lucide-react';
+
+// 1. Importamos o nosso novo componente modular (Certifica-te que o caminho está correto)
+import FundoEscuro from '../FundoEscuro/FundoEscuro';
 
 // Importação das Fases (Ajusta o caminho consoante a organização das tuas pastas)
 import Fase1 from '../../pages/Fases/Fase1/Fase1';
@@ -52,8 +54,9 @@ export default function ModalDetalhes({ item, aoFechar }) {
         );
     };
 
-    return createPortal(
-        <div className="modal-overlay" onClick={aoFechar}>
+    // 2. Substituímos o createPortal e a div.modal-overlay pelo componente <FundoEscuro>
+    return (
+        <FundoEscuro aoFechar={aoFechar} zIndex={1000} opacidade={0.6}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
 
                 {/* Cabeçalho do Modal */}
@@ -98,7 +101,6 @@ export default function ModalDetalhes({ item, aoFechar }) {
                 </div>
 
             </div>
-        </div>,
-        document.body
+        </FundoEscuro>
     );
 }
