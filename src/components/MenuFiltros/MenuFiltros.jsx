@@ -14,14 +14,15 @@ export default function MenuFiltros({
     filtroStatus, setFiltroStatus,
     filtroScl, setFiltroScl,
     filtroCc, setFiltroCc,
+    filtroData, setFiltroData, // ✨ Novo Estado Recebido
     responsaveisUnicos,
     centrosCustoUnicos,
+    datasUnicas, // ✨ Nova Lista de Datas Recebida
     limparFiltros
 }) {
     if (!mostrar) return null;
 
     return (
-        // Utilizamos o FundoEscuro com propriedades de Modal (opacidade mais forte)
         <FundoEscuro aoFechar={aoFechar} zIndex={1000} opacidade={0.6}>
             <div className="filtro-modal-content" onClick={(e) => e.stopPropagation()}>
 
@@ -38,6 +39,18 @@ export default function MenuFiltros({
 
                 {/* CORPO COM AS OPÇÕES */}
                 <div className="filtro-modal-body">
+
+                    {/* ✨ NOVO FILTRO: Data de Solicitação */}
+                    <div className="filter-group">
+                        <label>Data de Solicitação</label>
+                        <select className="filter-select" value={filtroData} onChange={(e) => setFiltroData(e.target.value)}>
+                            <option value="todas">Todas as Datas</option>
+                            {datasUnicas.map((data, index) => (
+                                <option key={index} value={data}>{data}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="filter-group">
                         <label>Fase do Projeto</label>
                         <select className="filter-select" value={filtroFase} onChange={(e) => setFiltroFase(e.target.value)}>

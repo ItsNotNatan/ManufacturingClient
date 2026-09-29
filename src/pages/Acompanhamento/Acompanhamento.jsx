@@ -1,6 +1,6 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel com Filtros (Modal), Paginação e Status
+// DESCRIÇÃO: Painel com Filtros Dinâmicos modulares, Paginação e Data de Solicitação
 // =================================================================
 import React, { useState, useEffect } from 'react';
 import {
@@ -9,50 +9,54 @@ import {
     ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-// Importação dos Componentes Modulares
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
 import MenuFiltros from '../../components/MenuFiltros/MenuFiltros';
 import './Acompanhamento.css';
 
 export default function Acompanhamento() {
-    // --- ESTADOS BASE ---
     const [pesquisa, setPesquisa] = useState('');
     const [itemSelecionado, setItemSelecionado] = useState(null);
 
-    // --- ESTADOS DOS FILTROS ---
+    // ✨ ESTADOS DOS FILTROS (Adicionado o filtroData)
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
     const [filtroFase, setFiltroFase] = useState('todas');
     const [filtroStatus, setFiltroStatus] = useState('todos');
     const [filtroScl, setFiltroScl] = useState('todos');
     const [filtroCc, setFiltroCc] = useState('todos');
+    const [filtroData, setFiltroData] = useState('todas');
 
-    // --- ESTADOS DE PAGINAÇÃO ---
     const [paginaAtual, setPaginaAtual] = useState(1);
     const itensPorPagina = 10;
 
-    // --- MOCK DATA ---
     const [solicitacoes] = useState([
-        { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50 },
-        { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30 },
-        { id: 'VW-B38-ANCHIETA-0006-2025', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'concluido', faseAtual: 3, progresso: 80 },
-        { id: 'EV1322-SUPORTE-SENSOR-V2', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 100 },
-        { id: 'EV1400-ESTRUTURA-BASE-A', scl: 'Tiago Mendes', centroCusto: 'BRBCBBA60', nomeCentroCusto: 'NOVO CHASSI JEEP', status: 'cancelado', faseAtual: 1, progresso: 15 },
-        { id: 'VW200-PORTA-TRAS-0021-2026', scl: 'Luísa Marques', centroCusto: 'BRBCBBA61', nomeCentroCusto: 'VW POLO PORTAS', status: 'cancelado', faseAtual: 2, progresso: 40 },
-        { id: 'VW427-PATAGONIA-0042-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 20 },
-        { id: 'VW427-PATAGONIA-0043-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 90 },
-        { id: 'BB37-VW-ANCH-UB2-0004-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 10 },
-        { id: 'EV1323-SUPORTE-SENSOR-V3', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 60 },
-        { id: 'EV1500-MAQUINA-TESTE-B', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'pendente', faseAtual: 1, progresso: 5 },
+        { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50, dataSolicitacao: '10/09/2026' },
+        { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30, dataSolicitacao: '12/09/2026' },
+        { id: 'VW-B38-ANCHIETA-0006-2025', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'concluido', faseAtual: 3, progresso: 80, dataSolicitacao: '05/09/2026' },
+        { id: 'EV1322-SUPORTE-SENSOR-V2', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 100, dataSolicitacao: '01/09/2026' },
+        { id: 'EV1400-ESTRUTURA-BASE-A', scl: 'Tiago Mendes', centroCusto: 'BRBCBBA60', nomeCentroCusto: 'NOVO CHASSI JEEP', status: 'cancelado', faseAtual: 1, progresso: 15, dataSolicitacao: '20/09/2026' },
+        { id: 'VW200-PORTA-TRAS-0021-2026', scl: 'Luísa Marques', centroCusto: 'BRBCBBA61', nomeCentroCusto: 'VW POLO PORTAS', status: 'cancelado', faseAtual: 2, progresso: 40, dataSolicitacao: '22/09/2026' },
+        { id: 'VW427-PATAGONIA-0042-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 20, dataSolicitacao: '25/09/2026' },
+        { id: 'VW427-PATAGONIA-0043-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 90, dataSolicitacao: '26/09/2026' },
+        { id: 'BB37-VW-ANCH-UB2-0004-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 10, dataSolicitacao: '27/09/2026' },
+        { id: 'EV1323-SUPORTE-SENSOR-V3', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 60, dataSolicitacao: '18/09/2026' },
+        { id: 'EV1500-MAQUINA-TESTE-B', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'pendente', faseAtual: 1, progresso: 5, dataSolicitacao: '28/09/2026' },
     ]);
 
+    // Extração dinâmica de opções
     const responsaveisUnicos = [...new Set(solicitacoes.map(item => item.scl))].sort();
     const centrosCustoUnicos = [...new Set(solicitacoes.map(item => item.centroCusto))].sort();
 
+    // ✨ Extração e ordenação de datas (da mais recente para a mais antiga)
+    const datasUnicas = [...new Set(solicitacoes.map(item => item.dataSolicitacao))].sort((a, b) => {
+        const [diaA, mesA, anoA] = a.split('/');
+        const [diaB, mesB, anoB] = b.split('/');
+        return new Date(anoB, mesB - 1, diaB) - new Date(anoA, mesA - 1, diaA);
+    });
+
     useEffect(() => {
         setPaginaAtual(1);
-    }, [pesquisa, filtroFase, filtroStatus, filtroScl, filtroCc]);
+    }, [pesquisa, filtroFase, filtroStatus, filtroScl, filtroCc, filtroData]);
 
-    // --- FUNÇÕES AUXILIARES DE FORMATAÇÃO ---
     const getStatusInfo = (faseAtual, progresso, statusGeral) => {
         if (statusGeral === 'cancelado') return { classe: 'status-cancelado', texto: 'Cancelado', icone: <XCircle size={14} /> };
         if (faseAtual === 3 && progresso === 100) return { classe: 'status-concluido', texto: 'Projeto Concluído', icone: <CheckCircle2 size={14} /> };
@@ -86,10 +90,10 @@ export default function Acompanhamento() {
         setFiltroStatus('todos');
         setFiltroScl('todos');
         setFiltroCc('todos');
+        setFiltroData('todas'); // ✨ Reseta também o filtro de data
         setMostrarFiltros(false);
     };
 
-    // --- LÓGICA DE FILTRAGEM ---
     const solicitacoesFiltradas = solicitacoes.filter(item => {
         const matchPesquisa = item.id.toLowerCase().includes(pesquisa.toLowerCase()) ||
             item.scl.toLowerCase().includes(pesquisa.toLowerCase()) ||
@@ -99,15 +103,17 @@ export default function Acompanhamento() {
         const matchScl = filtroScl === 'todos' || item.scl === filtroScl;
         const matchCc = filtroCc === 'todos' || item.centroCusto === filtroCc;
 
+        // ✨ Verificação da Data de Solicitação
+        const matchData = filtroData === 'todas' || item.dataSolicitacao === filtroData;
+
         let matchStatus = true;
         if (filtroStatus === 'cancelado') matchStatus = item.status === 'cancelado';
         else if (filtroStatus === 'concluido') matchStatus = item.status !== 'cancelado' && item.faseAtual === 3 && item.progresso === 100;
         else if (filtroStatus === 'ativos') matchStatus = item.status !== 'cancelado' && !(item.faseAtual === 3 && item.progresso === 100);
 
-        return matchPesquisa && matchFase && matchStatus && matchScl && matchCc;
+        return matchPesquisa && matchFase && matchStatus && matchScl && matchCc && matchData;
     });
 
-    // --- CÁLCULOS DE PAGINAÇÃO ---
     const indiceUltimoItem = paginaAtual * itensPorPagina;
     const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
     const itensAtuais = solicitacoesFiltradas.slice(indicePrimeiroItem, indiceUltimoItem);
@@ -117,17 +123,15 @@ export default function Acompanhamento() {
         if (numeroPagina > 0 && numeroPagina <= totalPaginas) setPaginaAtual(numeroPagina);
     };
 
-    // --- INDICADORES (KPIs) ---
     const totalPedidos = solicitacoes.length;
     const emProgresso = solicitacoes.filter(s => s.faseAtual < 3 && s.status !== 'cancelado').length;
     const emManufatura = solicitacoes.filter(s => s.faseAtual === 3 && s.status !== 'cancelado').length;
 
-    // Detetar se há filtros ativos
-    const temFiltroAtivo = filtroFase !== 'todas' || filtroStatus !== 'todos' || filtroScl !== 'todos' || filtroCc !== 'todos';
+    // ✨ Atualizamos a variável para incluir o filtroData no brilho azul do botão
+    const temFiltroAtivo = filtroFase !== 'todas' || filtroStatus !== 'todos' || filtroScl !== 'todos' || filtroCc !== 'todos' || filtroData !== 'todas';
 
     return (
         <div className="acompanhamento-container">
-            {/* CABEÇALHO */}
             <div className="acompanhamento-header">
                 <div>
                     <h2 className="acompanhamento-title">
@@ -140,7 +144,6 @@ export default function Acompanhamento() {
                 </div>
             </div>
 
-            {/* CARTÕES DE RESUMO */}
             <div className="kpi-wrapper">
                 <div className="kpi-card">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#2563eb' }}>
@@ -171,7 +174,6 @@ export default function Acompanhamento() {
                 </div>
             </div>
 
-            {/* ZONA DE PESQUISA E BOTÃO DE FILTROS */}
             <div className="acompanhamento-actions">
                 <div className="search-box">
                     <Search size={18} />
@@ -183,35 +185,38 @@ export default function Acompanhamento() {
                     />
                 </div>
 
-                <button
-                    className="btn btn-outline"
-                    onClick={() => setMostrarFiltros(true)}
-                    style={{
-                        display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff',
-                        border: `1px solid ${temFiltroAtivo ? '#3b82f6' : '#cbd5e1'}`,
-                        padding: '0.75rem 1.5rem', borderRadius: '0.75rem', cursor: 'pointer',
-                        fontWeight: 'bold', color: temFiltroAtivo ? '#2563eb' : '#334155'
-                    }}
-                >
-                    <Filter size={18} />
-                    Filtros {temFiltroAtivo && '(Ativos)'}
-                </button>
+                <div className="filter-container" style={{ position: 'relative', zIndex: mostrarFiltros ? 50 : 1 }}>
+                    <button
+                        className="btn btn-outline"
+                        onClick={() => setMostrarFiltros(true)}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff',
+                            border: `1px solid ${temFiltroAtivo ? '#3b82f6' : '#cbd5e1'}`,
+                            padding: '0.75rem 1.5rem', borderRadius: '0.75rem', cursor: 'pointer',
+                            fontWeight: 'bold', color: temFiltroAtivo ? '#2563eb' : '#334155'
+                        }}
+                    >
+                        <Filter size={18} />
+                        Filtros {temFiltroAtivo && '(Ativos)'}
+                    </button>
 
-                {/* MODAL DE FILTROS */}
-                <MenuFiltros
-                    mostrar={mostrarFiltros}
-                    aoFechar={() => setMostrarFiltros(false)}
-                    filtroFase={filtroFase} setFiltroFase={setFiltroFase}
-                    filtroStatus={filtroStatus} setFiltroStatus={setFiltroStatus}
-                    filtroScl={filtroScl} setFiltroScl={setFiltroScl}
-                    filtroCc={filtroCc} setFiltroCc={setFiltroCc}
-                    responsaveisUnicos={responsaveisUnicos}
-                    centrosCustoUnicos={centrosCustoUnicos}
-                    limparFiltros={limparFiltros}
-                />
+                    {/* ✨ Componente MenuFiltros com as novas propriedades de Data passadas para ele */}
+                    <MenuFiltros
+                        mostrar={mostrarFiltros}
+                        aoFechar={() => setMostrarFiltros(false)}
+                        filtroFase={filtroFase} setFiltroFase={setFiltroFase}
+                        filtroStatus={filtroStatus} setFiltroStatus={setFiltroStatus}
+                        filtroScl={filtroScl} setFiltroScl={setFiltroScl}
+                        filtroCc={filtroCc} setFiltroCc={setFiltroCc}
+                        filtroData={filtroData} setFiltroData={setFiltroData}
+                        responsaveisUnicos={responsaveisUnicos}
+                        centrosCustoUnicos={centrosCustoUnicos}
+                        datasUnicas={datasUnicas}
+                        limparFiltros={limparFiltros}
+                    />
+                </div>
             </div>
 
-            {/* TABELA DE DADOS */}
             <div className="table-container">
                 <table className="tracking-table">
                     <thead>
@@ -219,6 +224,7 @@ export default function Acompanhamento() {
                             <th>Transmissão / Eventual</th>
                             <th>SCL / Responsável</th>
                             <th>Centro de Custo</th>
+                            <th>Data Solicitação</th>
                             <th>Status Geral</th>
                             <th style={{ width: '250px' }}>Evolução do Projeto</th>
                         </tr>
@@ -251,6 +257,11 @@ export default function Acompanhamento() {
                                                 {item.nomeCentroCusto}
                                             </div>
                                         </td>
+
+                                        <td style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '500', opacity: foiCancelado ? 0.6 : 1 }}>
+                                            {item.dataSolicitacao}
+                                        </td>
+
                                         <td>
                                             <span className={`status-badge ${statusInfo.classe}`}>
                                                 {statusInfo.icone} {statusInfo.texto}
@@ -291,7 +302,7 @@ export default function Acompanhamento() {
                             })
                         ) : (
                             <tr>
-                                <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
                                     <Search size={40} style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
                                     Nenhuma transmissão encontrada com os filtros atuais.
                                 </td>
@@ -300,7 +311,6 @@ export default function Acompanhamento() {
                     </tbody>
                 </table>
 
-                {/* CONTROLES DE PAGINAÇÃO */}
                 {totalPaginas > 1 && (
                     <div className="pagination-container">
                         <div className="pagination-info">
@@ -323,7 +333,6 @@ export default function Acompanhamento() {
                 )}
             </div>
 
-            {/* MODAL DETALHES DE PROJETO */}
             {itemSelecionado && (
                 <ModalDetalhes item={itemSelecionado} aoFechar={() => setItemSelecionado(null)} />
             )}
