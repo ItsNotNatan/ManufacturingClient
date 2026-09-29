@@ -1,11 +1,12 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel com suporte a Projetos Cancelados e Barra Dinâmica
+// DESCRIÇÃO: Painel de acompanhamento com Paginação, Projetos Cancelados e Barra Dinâmica
 // =================================================================
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Search, Filter, Briefcase, LayoutDashboard,
-    TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck, XCircle
+    TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck, XCircle,
+    ChevronLeft, ChevronRight // Ícones novos para a paginação
 } from 'lucide-react';
 
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
@@ -15,19 +16,24 @@ export default function Acompanhamento() {
     const [pesquisa, setPesquisa] = useState('');
     const [itemSelecionado, setItemSelecionado] = useState(null);
 
-    // MOCK DATA: Inclui agora exemplos de projetos CANCELADOS
+    // ✨ ESTADOS DE PAGINAÇÃO
+    const [paginaAtual, setPaginaAtual] = useState(1);
+    const itensPorPagina = 4; // Número de projetos exibidos por cada página
+
     const [solicitacoes] = useState([
         { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50 },
         { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30 },
         { id: 'VW-B38-ANCHIETA-0006-2025', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'concluido', faseAtual: 3, progresso: 80 },
         { id: 'EV1322-SUPORTE-SENSOR-V2', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 100 },
-
-        // ✨ EXEMPLOS NOVOS: Projetos Cancelados
         { id: 'EV1400-ESTRUTURA-BASE-A', scl: 'Tiago Mendes', centroCusto: 'BRBCBBA60', nomeCentroCusto: 'NOVO CHASSI JEEP', status: 'cancelado', faseAtual: 1, progresso: 15 },
         { id: 'VW200-PORTA-TRAS-0021-2026', scl: 'Luísa Marques', centroCusto: 'BRBCBBA61', nomeCentroCusto: 'VW POLO PORTAS', status: 'cancelado', faseAtual: 2, progresso: 40 },
     ]);
 
-    // ✨ LÓGICA DE STATUS: Tratamento especial para o status 'cancelado'
+    // ✨ EFEITO: Sempre que o utilizador faz uma nova pesquisa, voltamos à página 1
+    useEffect(() => {
+        setPaginaAtual(1);
+    }, [pesquisa]);
+
     const getStatusInfo = (faseAtual, progresso, statusGeral) => {
         if (statusGeral === 'cancelado') {
             return { classe: 'status-cancelado', texto: 'Cancelado', icone: <XCircle size={14} /> };
@@ -35,15 +41,9 @@ export default function Acompanhamento() {
         if (faseAtual === 3 && progresso === 100) {
             return { classe: 'status-concluido', texto: 'Projeto Concluído', icone: <CheckCircle2 size={14} /> };
         }
-        if (faseAtual === 1) {
-            return { classe: 'status-pendente', texto: 'Em Orçamento', icone: <Calculator size={14} /> };
-        }
-        if (faseAtual === 2) {
-            return { classe: 'status-transito', texto: 'Em Planejamento', icone: <CalendarCheck size={14} /> };
-        }
-        if (faseAtual === 3) {
-            return { classe: 'status-concluido', texto: 'Em Manufatura', icone: <Factory size={14} /> };
-        }
+        if (faseAtual === 1) return { classe: 'status-pendente', texto: 'Em Orçamento', icone: <Calculator size={14} /> };
+        if (faseAtual === 2) return { classe: 'status-transito', texto: 'Em Planejamento', icone: <CalendarCheck size={14} /> };
+        if (faseAtual === 3) return { classe: 'status-concluido', texto: 'Em Manufatura', icone: <Factory size={14} /> };
 
         return { classe: 'status-pendente', texto: 'Desconhecido', icone: <Briefcase size={14} /> };
     };
@@ -55,19 +55,17 @@ export default function Acompanhamento() {
         return 'Concluído';
     };
 
-    // Lógica Matemática da Barra
     const getProgressoSegmento = (faseDoSegmento, faseAtual, progressoNaFaseAtual) => {
-        if (faseAtual > faseDoSegmento) return 100; // Fase já concluída
-        if (faseAtual === faseDoSegmento) return progressoNaFaseAtual; // Fase em andamento
-        return 0; // Fase futura
+        if (faseAtual > faseDoSegmento) return 100;
+        if (faseAtual === faseDoSegmento) return progressoNaFaseAtual;
+        return 0;
     };
 
-    // ✨ Lógica para definir a cor da barra (Fica vermelha na fase em que foi cancelado)
     const getCorSegmento = (faseDoSegmento, item) => {
-        if (item.status === 'cancelado' && item.faseAtual === faseDoSegmento) return '#ef4444'; // Vermelho
-        if (faseDoSegmento === 1) return '#3b82f6'; // Azul
-        if (faseDoSegmento === 2) return '#f59e0b'; // Laranja
-        if (faseDoSegmento === 3) return '#10b981'; // Verde
+        if (item.status === 'cancelado' && item.faseAtual === faseDoSegmento) return '#ef4444';
+        if (faseDoSegmento === 1) return '#3b82f6';
+        if (faseDoSegmento === 2) return '#f59e0b';
+        if (faseDoSegmento === 3) return '#10b981';
         return '#cbd5e1';
     };
 
@@ -76,11 +74,29 @@ export default function Acompanhamento() {
         return Math.round(progressoTotal);
     };
 
+    // 1. Filtramos todos os dados com base na pesquisa
     const solicitacoesFiltradas = solicitacoes.filter(item =>
         item.id.toLowerCase().includes(pesquisa.toLowerCase()) ||
         item.scl.toLowerCase().includes(pesquisa.toLowerCase()) ||
         item.centroCusto.toLowerCase().includes(pesquisa.toLowerCase())
     );
+
+    // ✨ 2. CÁLCULOS DE PAGINAÇÃO
+    const indiceUltimoItem = paginaAtual * itensPorPagina;
+    const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
+
+    // Extrai apenas os itens que pertencem à página atual
+    const itensAtuais = solicitacoesFiltradas.slice(indicePrimeiroItem, indiceUltimoItem);
+
+    // Calcula o total de páginas
+    const totalPaginas = Math.ceil(solicitacoesFiltradas.length / itensPorPagina);
+
+    // Função para mudar de página
+    const mudarPagina = (numeroPagina) => {
+        if (numeroPagina > 0 && numeroPagina <= totalPaginas) {
+            setPaginaAtual(numeroPagina);
+        }
+    };
 
     const totalPedidos = solicitacoes.length;
     const emProgresso = solicitacoes.filter(s => s.faseAtual < 3 && s.status !== 'cancelado').length;
@@ -88,7 +104,6 @@ export default function Acompanhamento() {
 
     return (
         <div className="acompanhamento-container">
-            {/* CABEÇALHO */}
             <div className="acompanhamento-header">
                 <div>
                     <h2 className="acompanhamento-title">
@@ -101,7 +116,7 @@ export default function Acompanhamento() {
                 </div>
             </div>
 
-            {/* CARTÕES DE RESUMO (KPIs) */}
+            {/* CARTÕES DE RESUMO */}
             <div className="kpi-wrapper">
                 <div className="kpi-card">
                     <div className="kpi-icon-box" style={{ backgroundColor: '#eff6ff', color: '#2563eb' }}>
@@ -161,9 +176,9 @@ export default function Acompanhamento() {
                         </tr>
                     </thead>
                     <tbody>
-                        {solicitacoesFiltradas.length > 0 ? (
-                            solicitacoesFiltradas.map((item) => {
-                                // Status recebe o statusGeral do item também para validar o cancelamento
+                        {/* ITERAMOS SOBRE 'itensAtuais' E NÃO SOBRE TODOS */}
+                        {itensAtuais.length > 0 ? (
+                            itensAtuais.map((item) => {
                                 const statusInfo = getStatusInfo(item.faseAtual, item.progresso, item.status);
                                 const progressoGlobal = calcularProgressoGlobal(item.faseAtual, item.progresso);
                                 const foiCancelado = item.status === 'cancelado';
@@ -189,19 +204,14 @@ export default function Acompanhamento() {
                                                 {item.nomeCentroCusto}
                                             </div>
                                         </td>
-
-                                        {/* EXIBIÇÃO DO STATUS GERAL */}
                                         <td>
                                             <span className={`status-badge ${statusInfo.classe}`}>
                                                 {statusInfo.icone} {statusInfo.texto}
                                             </span>
                                         </td>
-
-                                        {/* BARRA DE PROGRESSO SEGMENTADA */}
                                         <td>
                                             <div className="progress-wrapper">
                                                 <div className="progress-labels">
-                                                    {/* Se foi cancelado, mostra aviso vermelho, se não, mostra % normal */}
                                                     {foiCancelado ? (
                                                         <span className="progress-percentage" style={{ color: '#e11d48' }}>
                                                             Cancelado na Fase {item.faseAtual}
@@ -211,7 +221,6 @@ export default function Acompanhamento() {
                                                             {item.progresso}% da Fase {item.faseAtual}
                                                         </span>
                                                     )}
-
                                                     <span className="progress-phase-name" style={{ color: foiCancelado ? '#ef4444' : '#2563eb' }}>
                                                         Global: {progressoGlobal}%
                                                     </span>
@@ -243,12 +252,51 @@ export default function Acompanhamento() {
                             <tr>
                                 <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
                                     <Search size={40} style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
-                                    Nenhuma transmissão encontrada com os filtros atuais.
+                                    Nenhuma transmissão encontrada.
                                 </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
+
+                {/* ✨ CONTROLES DE PAGINAÇÃO NO RODAPÉ DA TABELA */}
+                {totalPaginas > 1 && (
+                    <div className="pagination-container">
+                        <div className="pagination-info">
+                            Mostrando de <strong>{indicePrimeiroItem + 1}</strong> a <strong>{Math.min(indiceUltimoItem, solicitacoesFiltradas.length)}</strong> de <strong>{solicitacoesFiltradas.length}</strong> projetos
+                        </div>
+                        <div className="pagination-controls">
+                            <button
+                                className="btn-page"
+                                onClick={() => mudarPagina(paginaAtual - 1)}
+                                disabled={paginaAtual === 1}
+                                title="Página Anterior"
+                            >
+                                <ChevronLeft size={16} />
+                            </button>
+
+                            {/* Gera os botões de número dinamicamente */}
+                            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(num => (
+                                <button
+                                    key={num}
+                                    className={`btn-page ${paginaAtual === num ? 'active' : ''}`}
+                                    onClick={() => mudarPagina(num)}
+                                >
+                                    {num}
+                                </button>
+                            ))}
+
+                            <button
+                                className="btn-page"
+                                onClick={() => mudarPagina(paginaAtual + 1)}
+                                disabled={paginaAtual === totalPaginas}
+                                title="Próxima Página"
+                            >
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {itemSelecionado && (
