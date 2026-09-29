@@ -1,12 +1,12 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel de acompanhamento com Paginação, Projetos Cancelados e Barra Dinâmica
+// DESCRIÇÃO: Painel de acompanhamento com Paginação (10 itens), Projetos Cancelados e Barra Dinâmica
 // =================================================================
 import React, { useState, useEffect } from 'react';
 import {
     Search, Filter, Briefcase, LayoutDashboard,
     TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck, XCircle,
-    ChevronLeft, ChevronRight // Ícones novos para a paginação
+    ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
@@ -18,8 +18,10 @@ export default function Acompanhamento() {
 
     // ✨ ESTADOS DE PAGINAÇÃO
     const [paginaAtual, setPaginaAtual] = useState(1);
-    const itensPorPagina = 4; // Número de projetos exibidos por cada página
+    // Limite alterado para 10 itens por página!
+    const itensPorPagina = 10;
 
+    // MOCK DATA: Adicionados mais itens para ultrapassar os 10 e ativar a paginação
     const [solicitacoes] = useState([
         { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50 },
         { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30 },
@@ -27,9 +29,16 @@ export default function Acompanhamento() {
         { id: 'EV1322-SUPORTE-SENSOR-V2', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 100 },
         { id: 'EV1400-ESTRUTURA-BASE-A', scl: 'Tiago Mendes', centroCusto: 'BRBCBBA60', nomeCentroCusto: 'NOVO CHASSI JEEP', status: 'cancelado', faseAtual: 1, progresso: 15 },
         { id: 'VW200-PORTA-TRAS-0021-2026', scl: 'Luísa Marques', centroCusto: 'BRBCBBA61', nomeCentroCusto: 'VW POLO PORTAS', status: 'cancelado', faseAtual: 2, progresso: 40 },
+
+        // --- Novos itens adicionados para forçar a paginação (total = 11 itens) ---
+        { id: 'VW427-PATAGONIA-0042-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 20 },
+        { id: 'VW427-PATAGONIA-0043-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 90 },
+        { id: 'BB37-VW-ANCH-UB2-0004-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 10 },
+        { id: 'EV1323-SUPORTE-SENSOR-V3', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 60 },
+        { id: 'EV1500-MAQUINA-TESTE-B', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'pendente', faseAtual: 1, progresso: 5 },
     ]);
 
-    // ✨ EFEITO: Sempre que o utilizador faz uma nova pesquisa, voltamos à página 1
+    // Sempre que o utilizador faz uma nova pesquisa, voltamos à página 1
     useEffect(() => {
         setPaginaAtual(1);
     }, [pesquisa]);
@@ -81,7 +90,7 @@ export default function Acompanhamento() {
         item.centroCusto.toLowerCase().includes(pesquisa.toLowerCase())
     );
 
-    // ✨ 2. CÁLCULOS DE PAGINAÇÃO
+    // 2. CÁLCULOS DE PAGINAÇÃO
     const indiceUltimoItem = paginaAtual * itensPorPagina;
     const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
 
@@ -176,7 +185,6 @@ export default function Acompanhamento() {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* ITERAMOS SOBRE 'itensAtuais' E NÃO SOBRE TODOS */}
                         {itensAtuais.length > 0 ? (
                             itensAtuais.map((item) => {
                                 const statusInfo = getStatusInfo(item.faseAtual, item.progresso, item.status);
@@ -252,14 +260,14 @@ export default function Acompanhamento() {
                             <tr>
                                 <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
                                     <Search size={40} style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
-                                    Nenhuma transmissão encontrada.
+                                    Nenhuma transmissão encontrada com os filtros atuais.
                                 </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
 
-                {/* ✨ CONTROLES DE PAGINAÇÃO NO RODAPÉ DA TABELA */}
+                {/* CONTROLES DE PAGINAÇÃO NO RODAPÉ DA TABELA */}
                 {totalPaginas > 1 && (
                     <div className="pagination-container">
                         <div className="pagination-info">
@@ -275,7 +283,6 @@ export default function Acompanhamento() {
                                 <ChevronLeft size={16} />
                             </button>
 
-                            {/* Gera os botões de número dinamicamente */}
                             {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(num => (
                                 <button
                                     key={num}
