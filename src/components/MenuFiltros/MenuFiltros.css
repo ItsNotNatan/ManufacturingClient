@@ -12,7 +12,6 @@
     border-radius: 0.75rem;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     padding: 1.25rem;
-    /* Z-index 50 garante que fica acima do Fundo Escuro (que é 40) */
     z-index: 50;
     animation: fadeIn 0.2s ease-out;
 }

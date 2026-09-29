@@ -1,6 +1,6 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel com Filtros Dinâmicos, Paginação, Status e Fundo Escuro Modular
+// DESCRIÇÃO: Painel com Filtros Dinâmicos modulares e Paginação
 // =================================================================
 import React, { useState, useEffect } from 'react';
 import {
@@ -9,27 +9,28 @@ import {
     ChevronLeft, ChevronRight, X
 } from 'lucide-react';
 
+// Importação dos Nossos Componentes Modulares
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
-import FundoEscuro from '../../components/FundoEscuro/FundoEscuro';
+import MenuFiltros from '../../components/MenuFiltros/MenuFiltros';
 import './Acompanhamento.css';
 
 export default function Acompanhamento() {
-    // Estados base
+    // --- ESTADOS BASE ---
     const [pesquisa, setPesquisa] = useState('');
     const [itemSelecionado, setItemSelecionado] = useState(null);
 
-    // ESTADOS DOS FILTROS
+    // --- ESTADOS DOS FILTROS ---
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
     const [filtroFase, setFiltroFase] = useState('todas');
     const [filtroStatus, setFiltroStatus] = useState('todos');
     const [filtroScl, setFiltroScl] = useState('todos');
     const [filtroCc, setFiltroCc] = useState('todos');
 
-    // ESTADOS DE PAGINAÇÃO
+    // --- ESTADOS DE PAGINAÇÃO ---
     const [paginaAtual, setPaginaAtual] = useState(1);
     const itensPorPagina = 10;
 
-    // MOCK DATA
+    // --- MOCK DATA ---
     const [solicitacoes] = useState([
         { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50 },
         { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30 },
@@ -44,15 +45,16 @@ export default function Acompanhamento() {
         { id: 'EV1500-MAQUINA-TESTE-B', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'pendente', faseAtual: 1, progresso: 5 },
     ]);
 
-    // Extração dinâmica de opções para os filtros de SCL e Centro de Custo
+    // Extração dinâmica de opções únicas para não termos de escrever as opções à mão
     const responsaveisUnicos = [...new Set(solicitacoes.map(item => item.scl))].sort();
     const centrosCustoUnicos = [...new Set(solicitacoes.map(item => item.centroCusto))].sort();
 
-    // Sempre que aplicarmos um filtro ou pesquisarmos, a tabela volta à página 1
+    // Sempre que aplicarmos um filtro ou pesquisarmos, garantimos que a tabela regressa à página 1
     useEffect(() => {
         setPaginaAtual(1);
     }, [pesquisa, filtroFase, filtroStatus, filtroScl, filtroCc]);
 
+    // --- FUNÇÕES AUXILIARES DE FORMATAÇÃO ---
     const getStatusInfo = (faseAtual, progresso, statusGeral) => {
         if (statusGeral === 'cancelado') return { classe: 'status-cancelado', texto: 'Cancelado', icone: <XCircle size={14} /> };
         if (faseAtual === 3 && progresso === 100) return { classe: 'status-concluido', texto: 'Projeto Concluído', icone: <CheckCircle2 size={14} /> };
@@ -89,7 +91,7 @@ export default function Acompanhamento() {
         setMostrarFiltros(false);
     };
 
-    // LÓGICA DE FILTRAGEM MULTIPLA
+    // --- LÓGICA DE FILTRAGEM ---
     const solicitacoesFiltradas = solicitacoes.filter(item => {
         const matchPesquisa = item.id.toLowerCase().includes(pesquisa.toLowerCase()) ||
             item.scl.toLowerCase().includes(pesquisa.toLowerCase()) ||
@@ -107,7 +109,7 @@ export default function Acompanhamento() {
         return matchPesquisa && matchFase && matchStatus && matchScl && matchCc;
     });
 
-    // CÁLCULOS DE PAGINAÇÃO
+    // --- CÁLCULOS DE PAGINAÇÃO ---
     const indiceUltimoItem = paginaAtual * itensPorPagina;
     const indicePrimeiroItem = indiceUltimoItem - itensPorPagina;
     const itensAtuais = solicitacoesFiltradas.slice(indicePrimeiroItem, indiceUltimoItem);
@@ -117,12 +119,10 @@ export default function Acompanhamento() {
         if (numeroPagina > 0 && numeroPagina <= totalPaginas) setPaginaAtual(numeroPagina);
     };
 
-    // KPIs Globais
+    // --- INDICADORES (KPIs) ---
     const totalPedidos = solicitacoes.length;
     const emProgresso = solicitacoes.filter(s => s.faseAtual < 3 && s.status !== 'cancelado').length;
     const emManufatura = solicitacoes.filter(s => s.faseAtual === 3 && s.status !== 'cancelado').length;
-
-    // Detetar se há algum filtro ativo para mudar a cor do botão
     const temFiltroAtivo = filtroFase !== 'todas' || filtroStatus !== 'todos' || filtroScl !== 'todos' || filtroCc !== 'todos';
 
     return (
@@ -171,7 +171,7 @@ export default function Acompanhamento() {
                 </div>
             </div>
 
-            {/* BARRA DE PESQUISA E BOTÃO DE FILTROS */}
+            {/* ZONA DE PESQUISA E FILTROS */}
             <div className="acompanhamento-actions">
                 <div className="search-box">
                     <Search size={18} />
@@ -182,11 +182,6 @@ export default function Acompanhamento() {
                         onChange={(e) => setPesquisa(e.target.value)}
                     />
                 </div>
-
-                {/* ✨ MENU DE FILTROS FLUTUANTE COM FUNDO ESCURO */}
-                {mostrarFiltros && (
-                    <FundoEscuro aoFechar={() => setMostrarFiltros(false)} zIndex={40} opacidade={0.4} />
-                )}
 
                 <div className="filter-container" style={{ position: 'relative', zIndex: mostrarFiltros ? 50 : 1 }}>
                     <button
@@ -203,55 +198,18 @@ export default function Acompanhamento() {
                         Filtros {temFiltroAtivo && '(Ativos)'}
                     </button>
 
-                    {mostrarFiltros && (
-                        <div className="filter-dropdown">
-                            <div className="filter-group">
-                                <label>Fase do Projeto</label>
-                                <select className="filter-select" value={filtroFase} onChange={(e) => setFiltroFase(e.target.value)}>
-                                    <option value="todas">Todas as Fases</option>
-                                    <option value="1">Fase 1: Orçamento</option>
-                                    <option value="2">Fase 2: Planejamento</option>
-                                    <option value="3">Fase 3: Manufatura</option>
-                                </select>
-                            </div>
-
-                            <div className="filter-group">
-                                <label>Status Geral</label>
-                                <select className="filter-select" value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}>
-                                    <option value="todos">Todos os Status</option>
-                                    <option value="ativos">Apenas Ativos (Em Andamento)</option>
-                                    <option value="concluido">Apenas Concluídos (100%)</option>
-                                    <option value="cancelado">Apenas Cancelados</option>
-                                </select>
-                            </div>
-
-                            <div className="filter-group">
-                                <label>Responsável (SCL)</label>
-                                <select className="filter-select" value={filtroScl} onChange={(e) => setFiltroScl(e.target.value)}>
-                                    <option value="todos">Todos os SCLs</option>
-                                    {responsaveisUnicos.map((resp, index) => (
-                                        <option key={index} value={resp}>{resp}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="filter-group">
-                                <label>Centro de Custo</label>
-                                <select className="filter-select" value={filtroCc} onChange={(e) => setFiltroCc(e.target.value)}>
-                                    <option value="todos">Todos os Centros de Custo</option>
-                                    {centrosCustoUnicos.map((cc, index) => (
-                                        <option key={index} value={cc}>{cc}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="filter-actions">
-                                <button className="btn-limpar-filtros" onClick={limparFiltros}>
-                                    Limpar Filtros
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    {/* Integração do nosso Componente Modular MenuFiltros */}
+                    <MenuFiltros
+                        mostrar={mostrarFiltros}
+                        aoFechar={() => setMostrarFiltros(false)}
+                        filtroFase={filtroFase} setFiltroFase={setFiltroFase}
+                        filtroStatus={filtroStatus} setFiltroStatus={setFiltroStatus}
+                        filtroScl={filtroScl} setFiltroScl={setFiltroScl}
+                        filtroCc={filtroCc} setFiltroCc={setFiltroCc}
+                        responsaveisUnicos={responsaveisUnicos}
+                        centrosCustoUnicos={centrosCustoUnicos}
+                        limparFiltros={limparFiltros}
+                    />
                 </div>
             </div>
 
@@ -327,12 +285,6 @@ export default function Acompanhamento() {
                                                     <div className="multi-progress-segment" title="Manufatura">
                                                         <div className="multi-progress-fill" style={{ width: `${getProgressoSegmento(3, item.faseAtual, item.progresso)}%`, backgroundColor: getCorSegmento(3, item) }}></div>
                                                     </div>
-                                                </div>
-
-                                                <div className="multi-progress-legends">
-                                                    <span style={{ color: item.faseAtual >= 1 ? (foiCancelado && item.faseAtual === 1 ? '#ef4444' : '#3b82f6') : '#cbd5e1' }}>Orç.</span>
-                                                    <span style={{ color: item.faseAtual >= 2 ? (foiCancelado && item.faseAtual === 2 ? '#ef4444' : '#f59e0b') : '#cbd5e1' }}>Plan.</span>
-                                                    <span style={{ color: item.faseAtual >= 3 ? (foiCancelado && item.faseAtual === 3 ? '#ef4444' : '#10b981') : '#cbd5e1' }}>Fab.</span>
                                                 </div>
                                             </div>
                                         </td>

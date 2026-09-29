@@ -6,9 +6,6 @@ import React from 'react';
 import FundoEscuro from '../FundoEscuro/FundoEscuro';
 import './MenuFiltros.css';
 
-/**
- * Recebe via "props" todas as funções e estados necessários da página pai
- */
 export default function MenuFiltros({
     mostrar,
     aoFechar,
@@ -20,15 +17,15 @@ export default function MenuFiltros({
     centrosCustoUnicos,
     limparFiltros
 }) {
-    // Se o estado 'mostrar' for falso, o componente não desenha nada no ecrã
+    // Retorna nulo se não for para mostrar, poupando recursos de renderização
     if (!mostrar) return null;
 
     return (
         <>
-            {/* 1. O nosso módulo de fundo escuro para tapar a página */}
+            {/* O nosso módulo de fundo escuro para focar a atenção do utilizador */}
             <FundoEscuro aoFechar={aoFechar} zIndex={40} opacidade={0.4} />
 
-            {/* 2. A caixa de opções do filtro */}
+            {/* A caixa flutuante com as opções */}
             <div className="filter-dropdown">
                 <div className="filter-group">
                     <label>Fase do Projeto</label>
