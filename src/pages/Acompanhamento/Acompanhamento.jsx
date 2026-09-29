@@ -1,11 +1,11 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel de acompanhamento com Barra de Progresso Segmentada e Global
+// DESCRIÇÃO: Painel de acompanhamento com ícones corrigidos e Barra Segmentada
 // =================================================================
 import React, { useState } from 'react';
 import {
     Search, Filter, Briefcase, LayoutDashboard,
-    TrendingUp, CheckCircle2, Clock, Activity, Factory
+    TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck
 } from 'lucide-react';
 
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
@@ -20,14 +20,29 @@ export default function Acompanhamento() {
         { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50 },
         { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30 },
         { id: 'VW-B38-ANCHIETA-0006-2025', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'concluido', faseAtual: 3, progresso: 80 },
+        // Exemplo de item 100% concluído na última fase
         { id: 'EV1322-SUPORTE-SENSOR-V2', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 100 },
     ]);
 
-    const getStatusInfo = (status) => {
-        if (status === 'pendente') return { classe: 'status-pendente', texto: 'Em Orçamento', icone: <Clock size={14} /> };
-        if (status === 'transito') return { classe: 'status-transito', texto: 'Em Planejamento', icone: <Activity size={14} /> };
-        if (status === 'concluido') return { classe: 'status-concluido', texto: 'Em Manufatura', icone: <CheckCircle2 size={14} /> };
-        return { classe: 'status-pendente', texto: 'Pendente', icone: <Clock size={14} /> };
+    // ✨ LÓGICA DE STATUS ATUALIZADA: Ícones característicos e validação de 100%
+    const getStatusInfo = (faseAtual, progresso) => {
+        // Se estiver na fase 3 e o progresso for 100%, o projeto está totalmente fechado.
+        if (faseAtual === 3 && progresso === 100) {
+            return { classe: 'status-concluido', texto: 'Projeto Concluído', icone: <CheckCircle2 size={14} /> };
+        }
+
+        if (faseAtual === 1) {
+            return { classe: 'status-pendente', texto: 'Em Orçamento', icone: <Calculator size={14} /> };
+        }
+        if (faseAtual === 2) {
+            return { classe: 'status-transito', texto: 'Em Planejamento', icone: <CalendarCheck size={14} /> };
+        }
+        if (faseAtual === 3) {
+            // Nota: Se chegou aqui, é porque o progresso é menor que 100
+            return { classe: 'status-concluido', texto: 'Em Manufatura', icone: <Factory size={14} /> };
+        }
+
+        return { classe: 'status-pendente', texto: 'Desconhecido', icone: <Briefcase size={14} /> };
     };
 
     const getNomeDaFase = (fase) => {
@@ -37,14 +52,14 @@ export default function Acompanhamento() {
         return 'Concluído';
     };
 
-    // ✨ LÓGICA MATEMÁTICA: Calcula se o segmento atual deve estar a 100%, 0% ou no valor do progresso
+    // LÓGICA MATEMÁTICA: Calcula se o segmento atual deve estar a 100%, 0% ou no valor do progresso
     const getProgressoSegmento = (faseDoSegmento, faseAtual, progressoNaFaseAtual) => {
         if (faseAtual > faseDoSegmento) return 100; // Fase já concluída
         if (faseAtual === faseDoSegmento) return progressoNaFaseAtual; // Fase em andamento
         return 0; // Fase futura
     };
 
-    // ✨ LÓGICA MATEMÁTICA: Calcula o avanço global (1/3 por cada fase completa)
+    // LÓGICA MATEMÁTICA: Calcula o avanço global (1/3 por cada fase completa)
     const calcularProgressoGlobal = (faseAtual, progressoAtual) => {
         const progressoTotal = ((faseAtual - 1) * 100 + progressoAtual) / 3;
         return Math.round(progressoTotal);
@@ -137,7 +152,8 @@ export default function Acompanhamento() {
                     <tbody>
                         {solicitacoesFiltradas.length > 0 ? (
                             solicitacoesFiltradas.map((item) => {
-                                const statusInfo = getStatusInfo(item.status);
+                                // Chamamos a nova lógica passando a fase e o progresso
+                                const statusInfo = getStatusInfo(item.faseAtual, item.progresso);
                                 const progressoGlobal = calcularProgressoGlobal(item.faseAtual, item.progresso);
 
                                 return (
@@ -157,6 +173,8 @@ export default function Acompanhamento() {
                                                 {item.nomeCentroCusto}
                                             </div>
                                         </td>
+
+                                        {/* EXIBIÇÃO DO STATUS COM ÍCONES NOVOS */}
                                         <td>
                                             <span className={`status-badge ${statusInfo.classe}`}>
                                                 {statusInfo.icone} {statusInfo.texto}
