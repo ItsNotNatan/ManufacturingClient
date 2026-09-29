@@ -1,5 +1,10 @@
-// src/pages/Acompanhamento/ModalDetalhes.jsx
+// =================================================================
+// ARQUIVO: src/components/ModalDetalhes/ModalDetalhes.jsx
+// DESCRIÇÃO: Componente de janela flutuante utilizando React Portals
+// =================================================================
 import React from 'react';
+// 1. Importamos a função de "teletransporte" do React DOM
+import { createPortal } from 'react-dom';
 import { X, Check } from 'lucide-react';
 
 // Importação das Fases (Ajusta o caminho consoante a organização das tuas pastas)
@@ -8,16 +13,11 @@ import Fase2 from '../../pages/Fases/Fase2/Fase2';
 import Fase3 from '../../pages/Fases/Fase3/Fase3';
 import './ModalDetalhes.css';
 
-/**
- * Componente ModalDetalhes
- * @param {Object} item - Os dados da solicitação selecionada na tabela
- * @param {Function} aoFechar - Função que avisa o pai para esconder a janela
- */
 export default function ModalDetalhes({ item, aoFechar }) {
-    // Segurança: se não houver item, não desenha nada
+    // Segurança: se não houver item selecionado, não desenha nada
     if (!item) return null;
 
-    // A Lógica da Linha do Tempo (Tracker) foi movida para cá
+    // A Lógica da Linha do Tempo (Tracker)
     const renderizarTracker = (faseAtual) => {
         const fases = [
             { numero: 1, nome: 'Fase 1: Orçamento' },
@@ -49,10 +49,11 @@ export default function ModalDetalhes({ item, aoFechar }) {
         );
     };
 
-    return (
-        // O clique no fundo escuro aciona a função de fechar
+    // 2. Aqui é a magia do Portal! 
+    // Em vez de retornar uma <div> normal, usamos o createPortal.
+    // O primeiro parâmetro é o HTML do modal, o segundo é o destino (document.body)
+    return createPortal(
         <div className="modal-overlay" onClick={aoFechar}>
-            {/* stopPropagation impede que clicar na caixa branca feche o modal */}
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
 
                 {/* Cabeçalho do Modal */}
@@ -60,10 +61,10 @@ export default function ModalDetalhes({ item, aoFechar }) {
                     <div>
                         <h2>Pedido: {item.id}</h2>
                         <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                            Solicitante: {item.solicitante} | Criado em: {item.data}
+                            Solicitante: {item.solicitante || item.scl} | Criado em: {item.data || 'Data indisponível'}
                         </span>
                     </div>
-                    {/* Botão X aciona a função de fechar */}
+                    {/* Botão X para fechar */}
                     <button className="btn-fechar-modal" onClick={aoFechar}>
                         <X size={24} />
                     </button>
@@ -71,10 +72,10 @@ export default function ModalDetalhes({ item, aoFechar }) {
 
                 {/* Corpo do Modal */}
                 <div className="modal-body">
-                    {/* Renderiza a Linha do Tempo */}
+                    {/* Renderiza a Linha do Tempo visual */}
                     {renderizarTracker(item.faseAtual)}
 
-                    {/* Renderiza o componente correto com base na fase do item */}
+                    {/* Renderiza a Fase correspondente ao projeto */}
                     <div style={{ marginTop: '2rem' }}>
                         {item.faseAtual === 1 && <Fase1 />}
                         {item.faseAtual === 2 && <Fase2 />}
@@ -83,6 +84,7 @@ export default function ModalDetalhes({ item, aoFechar }) {
                 </div>
 
             </div>
-        </div>
+        </div>,
+        document.body // <-- Este comando atira o Modal para a raiz da página, cobrindo TUDO.
     );
 }
