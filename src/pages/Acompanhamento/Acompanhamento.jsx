@@ -1,11 +1,11 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel de acompanhamento com ícones corrigidos e Barra Segmentada
+// DESCRIÇÃO: Painel com suporte a Projetos Cancelados e Barra Dinâmica
 // =================================================================
 import React, { useState } from 'react';
 import {
     Search, Filter, Briefcase, LayoutDashboard,
-    TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck
+    TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck, XCircle
 } from 'lucide-react';
 
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
@@ -15,22 +15,26 @@ export default function Acompanhamento() {
     const [pesquisa, setPesquisa] = useState('');
     const [itemSelecionado, setItemSelecionado] = useState(null);
 
-    // MOCK DATA: 'progresso' representa a % dentro da faseAtual
+    // MOCK DATA: Inclui agora exemplos de projetos CANCELADOS
     const [solicitacoes] = useState([
         { id: 'VW427-PATAGONIA-0041-2025', scl: 'João Silva', centroCusto: 'BRBCBBA47', nomeCentroCusto: 'GM_SPIN_MCM2_CLOSURES', status: 'pendente', faseAtual: 1, progresso: 50 },
         { id: 'BB37-VW-ANCH-UB2-0003-2025', scl: 'Maria Costa', centroCusto: 'BRBCBBA48', nomeCentroCusto: 'SHUTTLE MODELO X1H', status: 'transito', faseAtual: 2, progresso: 30 },
         { id: 'VW-B38-ANCHIETA-0006-2025', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'concluido', faseAtual: 3, progresso: 80 },
-        // Exemplo de item 100% concluído na última fase
         { id: 'EV1322-SUPORTE-SENSOR-V2', scl: 'Ana Costa', centroCusto: 'BRBCBBA51', nomeCentroCusto: 'GM GMI MCM - Closures', status: 'concluido', faseAtual: 3, progresso: 100 },
+
+        // ✨ EXEMPLOS NOVOS: Projetos Cancelados
+        { id: 'EV1400-ESTRUTURA-BASE-A', scl: 'Tiago Mendes', centroCusto: 'BRBCBBA60', nomeCentroCusto: 'NOVO CHASSI JEEP', status: 'cancelado', faseAtual: 1, progresso: 15 },
+        { id: 'VW200-PORTA-TRAS-0021-2026', scl: 'Luísa Marques', centroCusto: 'BRBCBBA61', nomeCentroCusto: 'VW POLO PORTAS', status: 'cancelado', faseAtual: 2, progresso: 40 },
     ]);
 
-    // ✨ LÓGICA DE STATUS ATUALIZADA: Ícones característicos e validação de 100%
-    const getStatusInfo = (faseAtual, progresso) => {
-        // Se estiver na fase 3 e o progresso for 100%, o projeto está totalmente fechado.
+    // ✨ LÓGICA DE STATUS: Tratamento especial para o status 'cancelado'
+    const getStatusInfo = (faseAtual, progresso, statusGeral) => {
+        if (statusGeral === 'cancelado') {
+            return { classe: 'status-cancelado', texto: 'Cancelado', icone: <XCircle size={14} /> };
+        }
         if (faseAtual === 3 && progresso === 100) {
             return { classe: 'status-concluido', texto: 'Projeto Concluído', icone: <CheckCircle2 size={14} /> };
         }
-
         if (faseAtual === 1) {
             return { classe: 'status-pendente', texto: 'Em Orçamento', icone: <Calculator size={14} /> };
         }
@@ -38,7 +42,6 @@ export default function Acompanhamento() {
             return { classe: 'status-transito', texto: 'Em Planejamento', icone: <CalendarCheck size={14} /> };
         }
         if (faseAtual === 3) {
-            // Nota: Se chegou aqui, é porque o progresso é menor que 100
             return { classe: 'status-concluido', texto: 'Em Manufatura', icone: <Factory size={14} /> };
         }
 
@@ -52,14 +55,22 @@ export default function Acompanhamento() {
         return 'Concluído';
     };
 
-    // LÓGICA MATEMÁTICA: Calcula se o segmento atual deve estar a 100%, 0% ou no valor do progresso
+    // Lógica Matemática da Barra
     const getProgressoSegmento = (faseDoSegmento, faseAtual, progressoNaFaseAtual) => {
         if (faseAtual > faseDoSegmento) return 100; // Fase já concluída
         if (faseAtual === faseDoSegmento) return progressoNaFaseAtual; // Fase em andamento
         return 0; // Fase futura
     };
 
-    // LÓGICA MATEMÁTICA: Calcula o avanço global (1/3 por cada fase completa)
+    // ✨ Lógica para definir a cor da barra (Fica vermelha na fase em que foi cancelado)
+    const getCorSegmento = (faseDoSegmento, item) => {
+        if (item.status === 'cancelado' && item.faseAtual === faseDoSegmento) return '#ef4444'; // Vermelho
+        if (faseDoSegmento === 1) return '#3b82f6'; // Azul
+        if (faseDoSegmento === 2) return '#f59e0b'; // Laranja
+        if (faseDoSegmento === 3) return '#10b981'; // Verde
+        return '#cbd5e1';
+    };
+
     const calcularProgressoGlobal = (faseAtual, progressoAtual) => {
         const progressoTotal = ((faseAtual - 1) * 100 + progressoAtual) / 3;
         return Math.round(progressoTotal);
@@ -72,8 +83,8 @@ export default function Acompanhamento() {
     );
 
     const totalPedidos = solicitacoes.length;
-    const emProgresso = solicitacoes.filter(s => s.faseAtual < 3).length;
-    const emManufatura = solicitacoes.filter(s => s.faseAtual === 3).length;
+    const emProgresso = solicitacoes.filter(s => s.faseAtual < 3 && s.status !== 'cancelado').length;
+    const emManufatura = solicitacoes.filter(s => s.faseAtual === 3 && s.status !== 'cancelado').length;
 
     return (
         <div className="acompanhamento-container">
@@ -106,7 +117,7 @@ export default function Acompanhamento() {
                         <TrendingUp size={24} />
                     </div>
                     <div className="kpi-details">
-                        <h4>Em Preparação (Fase 1 e 2)</h4>
+                        <h4>Em Preparação (Ativos)</h4>
                         <span>{emProgresso}</span>
                     </div>
                 </div>
@@ -115,7 +126,7 @@ export default function Acompanhamento() {
                         <Factory size={24} />
                     </div>
                     <div className="kpi-details">
-                        <h4>Em Manufatura (Fase 3)</h4>
+                        <h4>Em Manufatura (Ativos)</h4>
                         <span>{emManufatura}</span>
                     </div>
                 </div>
@@ -152,9 +163,10 @@ export default function Acompanhamento() {
                     <tbody>
                         {solicitacoesFiltradas.length > 0 ? (
                             solicitacoesFiltradas.map((item) => {
-                                // Chamamos a nova lógica passando a fase e o progresso
-                                const statusInfo = getStatusInfo(item.faseAtual, item.progresso);
+                                // Status recebe o statusGeral do item também para validar o cancelamento
+                                const statusInfo = getStatusInfo(item.faseAtual, item.progresso, item.status);
                                 const progressoGlobal = calcularProgressoGlobal(item.faseAtual, item.progresso);
+                                const foiCancelado = item.status === 'cancelado';
 
                                 return (
                                     <tr
@@ -163,51 +175,64 @@ export default function Acompanhamento() {
                                         onDoubleClick={() => setItemSelecionado(item)}
                                         title="Abrir detalhes do projeto"
                                     >
-                                        <td style={{ fontWeight: '800', color: '#2563eb' }}>{item.id}</td>
-                                        <td style={{ fontWeight: '600' }}>{item.scl}</td>
+                                        <td style={{ fontWeight: '800', color: foiCancelado ? '#94a3b8' : '#2563eb' }}>
+                                            <span style={{ textDecoration: foiCancelado ? 'line-through' : 'none' }}>
+                                                {item.id}
+                                            </span>
+                                        </td>
+                                        <td style={{ fontWeight: '600', color: foiCancelado ? '#94a3b8' : 'inherit' }}>{item.scl}</td>
                                         <td>
-                                            <div style={{ fontWeight: '700', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                            <div style={{ fontWeight: '700', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: foiCancelado ? 0.6 : 1 }}>
                                                 <Briefcase size={14} color="#64748b" /> {item.centroCusto}
                                             </div>
-                                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem', opacity: foiCancelado ? 0.6 : 1 }}>
                                                 {item.nomeCentroCusto}
                                             </div>
                                         </td>
 
-                                        {/* EXIBIÇÃO DO STATUS COM ÍCONES NOVOS */}
+                                        {/* EXIBIÇÃO DO STATUS GERAL */}
                                         <td>
                                             <span className={`status-badge ${statusInfo.classe}`}>
                                                 {statusInfo.icone} {statusInfo.texto}
                                             </span>
                                         </td>
 
-                                        {/* BARRA DE PROGRESSO SEGMENTADA E GLOBAL */}
+                                        {/* BARRA DE PROGRESSO SEGMENTADA */}
                                         <td>
                                             <div className="progress-wrapper">
                                                 <div className="progress-labels">
-                                                    <span className="progress-percentage">{item.progresso}% da Fase {item.faseAtual}</span>
-                                                    <span className="progress-phase-name" style={{ color: '#2563eb' }}>Global: {progressoGlobal}%</span>
+                                                    {/* Se foi cancelado, mostra aviso vermelho, se não, mostra % normal */}
+                                                    {foiCancelado ? (
+                                                        <span className="progress-percentage" style={{ color: '#e11d48' }}>
+                                                            Cancelado na Fase {item.faseAtual}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="progress-percentage">
+                                                            {item.progresso}% da Fase {item.faseAtual}
+                                                        </span>
+                                                    )}
+
+                                                    <span className="progress-phase-name" style={{ color: foiCancelado ? '#ef4444' : '#2563eb' }}>
+                                                        Global: {progressoGlobal}%
+                                                    </span>
                                                 </div>
 
-                                                <div className="multi-progress-wrapper">
-                                                    {/* Fase 1: Orçamento (Azul) */}
+                                                <div className="multi-progress-wrapper" style={{ opacity: foiCancelado ? 0.8 : 1 }}>
                                                     <div className="multi-progress-segment" title="Orçamento">
-                                                        <div className="multi-progress-fill" style={{ width: `${getProgressoSegmento(1, item.faseAtual, item.progresso)}%`, backgroundColor: '#3b82f6' }}></div>
+                                                        <div className="multi-progress-fill" style={{ width: `${getProgressoSegmento(1, item.faseAtual, item.progresso)}%`, backgroundColor: getCorSegmento(1, item) }}></div>
                                                     </div>
-                                                    {/* Fase 2: Planejamento (Laranja) */}
                                                     <div className="multi-progress-segment" title="Planejamento">
-                                                        <div className="multi-progress-fill" style={{ width: `${getProgressoSegmento(2, item.faseAtual, item.progresso)}%`, backgroundColor: '#f59e0b' }}></div>
+                                                        <div className="multi-progress-fill" style={{ width: `${getProgressoSegmento(2, item.faseAtual, item.progresso)}%`, backgroundColor: getCorSegmento(2, item) }}></div>
                                                     </div>
-                                                    {/* Fase 3: Manufatura (Verde) */}
                                                     <div className="multi-progress-segment" title="Manufatura">
-                                                        <div className="multi-progress-fill" style={{ width: `${getProgressoSegmento(3, item.faseAtual, item.progresso)}%`, backgroundColor: '#10b981' }}></div>
+                                                        <div className="multi-progress-fill" style={{ width: `${getProgressoSegmento(3, item.faseAtual, item.progresso)}%`, backgroundColor: getCorSegmento(3, item) }}></div>
                                                     </div>
                                                 </div>
 
                                                 <div className="multi-progress-legends">
-                                                    <span style={{ color: item.faseAtual >= 1 ? '#3b82f6' : '#cbd5e1' }}>Orç.</span>
-                                                    <span style={{ color: item.faseAtual >= 2 ? '#f59e0b' : '#cbd5e1' }}>Plan.</span>
-                                                    <span style={{ color: item.faseAtual >= 3 ? '#10b981' : '#cbd5e1' }}>Fab.</span>
+                                                    <span style={{ color: item.faseAtual >= 1 ? (foiCancelado && item.faseAtual === 1 ? '#ef4444' : '#3b82f6') : '#cbd5e1' }}>Orç.</span>
+                                                    <span style={{ color: item.faseAtual >= 2 ? (foiCancelado && item.faseAtual === 2 ? '#ef4444' : '#f59e0b') : '#cbd5e1' }}>Plan.</span>
+                                                    <span style={{ color: item.faseAtual >= 3 ? (foiCancelado && item.faseAtual === 3 ? '#ef4444' : '#10b981') : '#cbd5e1' }}>Fab.</span>
                                                 </div>
                                             </div>
                                         </td>
