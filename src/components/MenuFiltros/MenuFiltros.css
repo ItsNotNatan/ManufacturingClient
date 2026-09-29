@@ -1,44 +1,64 @@
 /* =================================================================
    ARQUIVO: src/components/MenuFiltros/MenuFiltros.css
-   DESCRIÇÃO: Estilos isolados para o menu suspenso de filtros
+   DESCRIÇÃO: Estilos para a janela modal central de Filtros
    ================================================================= */
-.filter-dropdown {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
-    width: 280px;
+
+/* A caixa central do Modal de Filtros */
+.filtro-modal-content {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    padding: 1.25rem;
-    z-index: 50;
-    animation: fadeIn 0.2s ease-out;
+    width: 90%;
+    max-width: 450px;
+    /* Mais estreito que os detalhes, pois é só um formulário */
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
-.filter-group {
-    margin-bottom: 1rem;
+/* Cabeçalho do Filtro */
+.filtro-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
 }
 
-.filter-group:last-child {
-    margin-bottom: 0;
+.filtro-modal-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #0f172a;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Corpo do Filtro */
+.filtro-modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
 .filter-group label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: #64748b;
+    color: #475569;
     text-transform: uppercase;
     margin-bottom: 0.4rem;
 }
 
 .filter-select {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.6rem 0.8rem;
     border: 1px solid #cbd5e1;
     border-radius: 0.5rem;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #1e293b;
     background-color: #f8fafc;
     outline: none;
@@ -47,14 +67,17 @@
 }
 
 .filter-select:focus {
-    border-color: #3b82f6;
+    border-color: #2563eb;
+    background-color: #ffffff;
 }
 
-.filter-actions {
+/* Rodapé com botões de ação */
+.filtro-modal-footer {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 1.25rem;
+    justify-content: space-between;
+    align-items: center;
     padding-top: 1rem;
+    margin-top: 0.5rem;
     border-top: 1px solid #e2e8f0;
 }
 
@@ -62,11 +85,13 @@
     background: none;
     border: none;
     color: #ef4444;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.4rem;
 }
 
 .btn-limpar-filtros:hover {
-    text-decoration: underline;
+    background-color: #fef2f2;
 }

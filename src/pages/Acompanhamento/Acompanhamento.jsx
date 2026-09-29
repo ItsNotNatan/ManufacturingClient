@@ -1,15 +1,15 @@
 // =================================================================
 // ARQUIVO: src/pages/Acompanhamento/Acompanhamento.jsx
-// DESCRIÇÃO: Painel com Filtros Dinâmicos modulares e Paginação
+// DESCRIÇÃO: Painel com Filtros (Modal), Paginação e Status
 // =================================================================
 import React, { useState, useEffect } from 'react';
 import {
     Search, Filter, Briefcase, LayoutDashboard,
     TrendingUp, CheckCircle2, Factory, Calculator, CalendarCheck, XCircle,
-    ChevronLeft, ChevronRight, X
+    ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-// Importação dos Nossos Componentes Modulares
+// Importação dos Componentes Modulares
 import ModalDetalhes from '../../components/ModalDetalhes/ModalDetalhes';
 import MenuFiltros from '../../components/MenuFiltros/MenuFiltros';
 import './Acompanhamento.css';
@@ -45,11 +45,9 @@ export default function Acompanhamento() {
         { id: 'EV1500-MAQUINA-TESTE-B', scl: 'Carlos Souza', centroCusto: 'BRBCBBA49', nomeCentroCusto: 'RETOOLING JEEP SUSP 291', status: 'pendente', faseAtual: 1, progresso: 5 },
     ]);
 
-    // Extração dinâmica de opções únicas para não termos de escrever as opções à mão
     const responsaveisUnicos = [...new Set(solicitacoes.map(item => item.scl))].sort();
     const centrosCustoUnicos = [...new Set(solicitacoes.map(item => item.centroCusto))].sort();
 
-    // Sempre que aplicarmos um filtro ou pesquisarmos, garantimos que a tabela regressa à página 1
     useEffect(() => {
         setPaginaAtual(1);
     }, [pesquisa, filtroFase, filtroStatus, filtroScl, filtroCc]);
@@ -123,6 +121,8 @@ export default function Acompanhamento() {
     const totalPedidos = solicitacoes.length;
     const emProgresso = solicitacoes.filter(s => s.faseAtual < 3 && s.status !== 'cancelado').length;
     const emManufatura = solicitacoes.filter(s => s.faseAtual === 3 && s.status !== 'cancelado').length;
+
+    // Detetar se há filtros ativos
     const temFiltroAtivo = filtroFase !== 'todas' || filtroStatus !== 'todos' || filtroScl !== 'todos' || filtroCc !== 'todos';
 
     return (
@@ -171,7 +171,7 @@ export default function Acompanhamento() {
                 </div>
             </div>
 
-            {/* ZONA DE PESQUISA E FILTROS */}
+            {/* ZONA DE PESQUISA E BOTÃO DE FILTROS */}
             <div className="acompanhamento-actions">
                 <div className="search-box">
                     <Search size={18} />
@@ -183,34 +183,32 @@ export default function Acompanhamento() {
                     />
                 </div>
 
-                <div className="filter-container" style={{ position: 'relative', zIndex: mostrarFiltros ? 50 : 1 }}>
-                    <button
-                        className="btn btn-outline"
-                        onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff',
-                            border: `1px solid ${mostrarFiltros || temFiltroAtivo ? '#3b82f6' : '#cbd5e1'}`,
-                            padding: '0.75rem 1.5rem', borderRadius: '0.75rem', cursor: 'pointer',
-                            fontWeight: 'bold', color: mostrarFiltros || temFiltroAtivo ? '#2563eb' : '#334155'
-                        }}
-                    >
-                        {mostrarFiltros ? <X size={18} /> : <Filter size={18} />}
-                        Filtros {temFiltroAtivo && '(Ativos)'}
-                    </button>
+                <button
+                    className="btn btn-outline"
+                    onClick={() => setMostrarFiltros(true)}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff',
+                        border: `1px solid ${temFiltroAtivo ? '#3b82f6' : '#cbd5e1'}`,
+                        padding: '0.75rem 1.5rem', borderRadius: '0.75rem', cursor: 'pointer',
+                        fontWeight: 'bold', color: temFiltroAtivo ? '#2563eb' : '#334155'
+                    }}
+                >
+                    <Filter size={18} />
+                    Filtros {temFiltroAtivo && '(Ativos)'}
+                </button>
 
-                    {/* Integração do nosso Componente Modular MenuFiltros */}
-                    <MenuFiltros
-                        mostrar={mostrarFiltros}
-                        aoFechar={() => setMostrarFiltros(false)}
-                        filtroFase={filtroFase} setFiltroFase={setFiltroFase}
-                        filtroStatus={filtroStatus} setFiltroStatus={setFiltroStatus}
-                        filtroScl={filtroScl} setFiltroScl={setFiltroScl}
-                        filtroCc={filtroCc} setFiltroCc={setFiltroCc}
-                        responsaveisUnicos={responsaveisUnicos}
-                        centrosCustoUnicos={centrosCustoUnicos}
-                        limparFiltros={limparFiltros}
-                    />
-                </div>
+                {/* MODAL DE FILTROS */}
+                <MenuFiltros
+                    mostrar={mostrarFiltros}
+                    aoFechar={() => setMostrarFiltros(false)}
+                    filtroFase={filtroFase} setFiltroFase={setFiltroFase}
+                    filtroStatus={filtroStatus} setFiltroStatus={setFiltroStatus}
+                    filtroScl={filtroScl} setFiltroScl={setFiltroScl}
+                    filtroCc={filtroCc} setFiltroCc={setFiltroCc}
+                    responsaveisUnicos={responsaveisUnicos}
+                    centrosCustoUnicos={centrosCustoUnicos}
+                    limparFiltros={limparFiltros}
+                />
             </div>
 
             {/* TABELA DE DADOS */}
@@ -325,6 +323,7 @@ export default function Acompanhamento() {
                 )}
             </div>
 
+            {/* MODAL DETALHES DE PROJETO */}
             {itemSelecionado && (
                 <ModalDetalhes item={itemSelecionado} aoFechar={() => setItemSelecionado(null)} />
             )}
