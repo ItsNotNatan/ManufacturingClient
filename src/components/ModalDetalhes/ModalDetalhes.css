@@ -1,9 +1,8 @@
 /* ==========================================
-   FILE: src/pages/Acompanhamento/ModalDetalhes.css
+   FILE: src/components/ModalDetalhes/ModalDetalhes.css
    ========================================== */
 
-/* 1. FUNDO ESCURO (OVERLAY) 
-   Cobre o ecrã inteiro com uma cor escura transparente e bloqueia cliques no fundo */
+/* 1. FUNDO ESCURO (OVERLAY) */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -18,8 +17,7 @@
     animation: fadeInModal 0.2s ease-out forwards;
 }
 
-/* 2. CAIXA BRANCA CENTRAL (CONTENT) 
-   A janela flutuante em si, com sombras suaves e bordas arredondadas */
+/* 2. CAIXA BRANCA CENTRAL (CONTENT) */
 .modal-content {
     background-color: #ffffff;
     width: 90%;
@@ -32,8 +30,7 @@
     overflow: hidden;
 }
 
-/* 3. CABEÇALHO DO MODAL 
-   Fica fixo no topo da caixa branca e contém o título e o botão de fechar */
+/* 3. CABEÇALHO DO MODAL (ATUALIZADO) */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -41,15 +38,61 @@
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e2e8f0;
     background-color: #f8fafc;
+    gap: 1rem;
 }
 
-.modal-header h2 {
+.modal-header-left {
+    flex: 1;
+}
+
+.modal-header-left h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: #0f172a;
+    font-weight: 800;
 }
 
-/* 4. BOTÃO DE FECHAR (O "X") */
+.modal-meta {
+    color: #64748b;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 0.3rem;
+    font-weight: 500;
+}
+
+/* 4. NOVA ÁREA: DATA PREVISTA E AUTOR */
+.modal-header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: 1rem;
+    padding-right: 1.5rem;
+    border-right: 1px solid #cbd5e1;
+}
+
+.data-prevista-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    border: 1px solid #bfdbfe;
+}
+
+.data-autor-info {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.4rem;
+    font-weight: 600;
+}
+
+/* 5. BOTÃO DE FECHAR (O "X") */
 .btn-fechar-modal {
     background: none;
     border: none;
@@ -68,15 +111,14 @@
     color: #ef4444;
 }
 
-/* 5. CORPO DO MODAL 
-   A área com barra de rolagem (scroll) onde as Fases são desenhadas */
+/* 6. CORPO DO MODAL */
 .modal-body {
     padding: 2rem;
     overflow-y: auto;
     flex: 1;
 }
 
-/* 6. RASTREADOR VISUAL (LINHA DO TEMPO) */
+/* 7. RASTREADOR VISUAL (LINHA DO TEMPO) */
 .tracker-container {
     display: flex;
     justify-content: space-between;
@@ -88,7 +130,6 @@
     margin-right: auto;
 }
 
-/* A linha cinzenta que liga as bolinhas por trás */
 .tracker-linha-fundo {
     position: absolute;
     top: 1.25rem;
@@ -127,7 +168,7 @@
     text-align: center;
 }
 
-/* 7. CORES DINÂMICAS DO RASTREADOR (ESTADOS) */
+/* 8. CORES DINÂMICAS DO RASTREADOR (ESTADOS) */
 .passo-concluido .tracker-bolinha {
     background: #10b981;
 }
@@ -150,7 +191,7 @@
     border: 4px solid #f8fafc;
 }
 
-/* 8. ANIMAÇÕES */
+/* 9. ANIMAÇÕES */
 @keyframes fadeInModal {
     from {
         opacity: 0;

@@ -1,11 +1,10 @@
 // =================================================================
 // ARQUIVO: src/components/ModalDetalhes/ModalDetalhes.jsx
-// DESCRIÇÃO: Componente de janela flutuante utilizando React Portals
+// DESCRIÇÃO: Componente de janela flutuante utilizando React Portals com Data Prevista
 // =================================================================
 import React from 'react';
-// 1. Importamos a função de "teletransporte" do React DOM
 import { createPortal } from 'react-dom';
-import { X, Check } from 'lucide-react';
+import { X, Check, Calendar, User } from 'lucide-react'; // Novos ícones importados
 
 // Importação das Fases (Ajusta o caminho consoante a organização das tuas pastas)
 import Fase1 from '../../pages/Fases/Fase1/Fase1';
@@ -16,6 +15,10 @@ import './ModalDetalhes.css';
 export default function ModalDetalhes({ item, aoFechar }) {
     // Segurança: se não houver item selecionado, não desenha nada
     if (!item) return null;
+
+    // Lógicas de fallback caso os dados da data não venham da API ainda
+    const dataPrevistaExibicao = item.dataPrevista || '15/10/2026';
+    const autorDataExibicao = item.autorDataPrevista || 'Equipa de Planejamento';
 
     // A Lógica da Linha do Tempo (Tracker)
     const renderizarTracker = (faseAtual) => {
@@ -49,23 +52,34 @@ export default function ModalDetalhes({ item, aoFechar }) {
         );
     };
 
-    // 2. Aqui é a magia do Portal! 
-    // Em vez de retornar uma <div> normal, usamos o createPortal.
-    // O primeiro parâmetro é o HTML do modal, o segundo é o destino (document.body)
     return createPortal(
         <div className="modal-overlay" onClick={aoFechar}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
 
                 {/* Cabeçalho do Modal */}
                 <div className="modal-header">
-                    <div>
-                        <h2>Pedido: {item.id}</h2>
-                        <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                            Solicitante: {item.solicitante || item.scl} | Criado em: {item.data || 'Data indisponível'}
+
+                    {/* ZONA ESQUERDA: Informações do Projeto */}
+                    <div className="modal-header-left">
+                        <h2>{item.id}</h2>
+                        <span className="modal-meta">
+                            SCL: {item.scl || item.solicitante} | C.C: {item.centroCusto || 'N/A'}
                         </span>
                     </div>
-                    {/* Botão X para fechar */}
-                    <button className="btn-fechar-modal" onClick={aoFechar}>
+
+                    {/* ZONA CENTRAL: Data Prevista e Autor */}
+                    <div className="modal-header-center">
+                        <div className="data-prevista-badge">
+                            <Calendar size={14} />
+                            <span>Entrega Prevista: <strong>{dataPrevistaExibicao}</strong></span>
+                        </div>
+                        <div className="data-autor-info">
+                            <User size={12} /> Definido por: {autorDataExibicao}
+                        </div>
+                    </div>
+
+                    {/* ZONA DIREITA: Botão X para fechar */}
+                    <button className="btn-fechar-modal" onClick={aoFechar} title="Fechar (ESC)">
                         <X size={24} />
                     </button>
                 </div>
@@ -85,6 +99,6 @@ export default function ModalDetalhes({ item, aoFechar }) {
 
             </div>
         </div>,
-        document.body // <-- Este comando atira o Modal para a raiz da página, cobrindo TUDO.
+        document.body
     );
 }
